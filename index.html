@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Glowing Background with Grey Box</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: radial-gradient(circle, #000000 0%, #0a0a0a 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Glowing background effect */
+    body::before {
+      content: "";
+      position: absolute;
+      width: 200vmax;
+      height: 200vmax;
+      background: radial-gradient(circle, rgba(255,255,255,0.1), transparent 60%);
+      animation: rotate 20s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .box {
+      position: relative;
+      z-index: 1;
+      background: #2c2c2c;
+      color: #f0f0f0;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.1), 0 0 10px rgba(0, 0, 0, 0.6);
+      width: 400px;
+      text-align: center;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .box h1 {
+      margin: 0 0 10px;
+      font-size: 28px;
+    }
+
+    .box p {
+      font-size: 16px;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Welcome</h1>
+    <p>This is a stylish grey box on a glowing black background.</p>
+  </div>
+</body>
+</html>
