@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>UI Document</title>
+  <title>UI Document - LiquidGlass</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     html, body {
@@ -14,73 +14,80 @@
       justify-content: center;
       align-items: center;
       font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
     }
 
-    body::before {
-      content: "";
-      position: fixed;
-      width: 200vmax;
-      height: 200vmax;
-      background: radial-gradient(circle, rgba(255,255,255,0.03), transparent 70%);
-      animation: rotate 30s linear infinite;
-      z-index: 0;
-    }
-
-    @keyframes rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    .glass-box {
+    .glass-wrapper {
       position: relative;
-      z-index: 1;
       width: 95%;
       max-width: 800px;
       min-height: 400px;
-      padding: 60px 40px;
       border-radius: 20px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow:
-        0 0 40px rgba(255, 255, 255, 0.05),
-        0 0 10px rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      color: #fff;
-      text-align: center;
+      overflow: hidden;
+      isolation: isolate;
     }
 
-    .glass-box h1 {
+    .glass-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      filter: url(#glass-distortion);
+    }
+
+    .glass-content {
+      position: relative;
+      z-index: 1;
+      padding: 60px 40px;
+      text-align: center;
+      color: #ffffff;
+    }
+
+    .glass-content h1 {
       font-size: 32px;
       margin-bottom: 20px;
       text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
     }
 
-    .glass-box p {
+    .glass-content p {
       font-size: 18px;
       color: #ccc;
     }
 
     @media (max-width: 500px) {
-      .glass-box {
+      .glass-content {
         padding: 40px 20px;
-        min-height: 300px;
       }
 
-      .glass-box h1 {
+      .glass-content h1 {
         font-size: 26px;
       }
 
-      .glass-box p {
+      .glass-content p {
         font-size: 16px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="glass-box">
-    <h1>UI Document - Coming Soon</h1>
-    <p>This is a LiquidGlass UI box on a glowing black background.</p>
+
+  <!-- SVG FILTER FOR DISTORTION -->
+  <svg style="position: absolute; width: 0; height: 0">
+    <filter id="glass-distortion">
+      <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="2" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="8" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+
+  <div class="glass-wrapper">
+    <div class="glass-bg"></div>
+    <div class="glass-content">
+      <h1>UI Document - Coming Soon</h1>
+      <p>This is a LiquidGlass UI with SVG distortion and blur.</p>
+    </div>
   </div>
+
 </body>
 </html>
