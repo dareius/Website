@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>UI Document - Ultra LiquidGlass</title>
+  <title>UI Document - LiquidGlass Pink</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
-      background: radial-gradient(circle at center, #000, #0a0a0a 100%);
+      background: radial-gradient(circle at center, #ff4f9f, #66003c);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -22,7 +22,7 @@
       content: "";
       position: fixed;
       inset: 0;
-      background: radial-gradient(circle, rgba(255,255,255,0.015), transparent 70%);
+      background: radial-gradient(circle, rgba(255,255,255,0.03), transparent 70%);
       animation: rotate 60s linear infinite;
       z-index: 0;
     }
@@ -40,16 +40,22 @@
       border-radius: 24px;
       overflow: hidden;
       isolation: isolate;
-      box-shadow: 0 0 60px rgba(255,255,255,0.03), 0 0 12px rgba(255,255,255,0.08), inset 0 0 5px rgba(255,255,255,0.1);
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 0 30px rgba(255, 105, 180, 0.15), 0 0 10px rgba(255, 255, 255, 0.05);
+    }
+
+    .glass-wrapper:hover {
+      box-shadow: 0 0 40px rgba(255, 105, 180, 0.5), 0 0 80px rgba(255, 192, 203, 0.2);
+      transform: scale(1.01);
     }
 
     .glass-bg {
       position: absolute;
       inset: 0;
       z-index: 0;
-      background: rgba(255, 255, 255, 0.025);
-      backdrop-filter: blur(30px) saturate(160%);
-      -webkit-backdrop-filter: blur(30px) saturate(160%);
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(25px) saturate(160%);
+      -webkit-backdrop-filter: blur(25px) saturate(160%);
       filter: url(#glass-distortion);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
@@ -76,12 +82,12 @@
       font-size: 36px;
       margin-bottom: 20px;
       text-shadow: 0 0 12px rgba(255, 255, 255, 0.07);
-      color: rgba(255, 255, 255, 0.92);
+      color: #fff;
     }
 
     .glass-content p {
       font-size: 20px;
-      color: rgba(255, 255, 255, 0.6);
+      color: rgba(255, 255, 255, 0.7);
     }
 
     @media (max-width: 600px) {
@@ -101,11 +107,11 @@
 </head>
 <body>
 
-  <!-- SVG FILTER: Distortion & Displacement -->
+  <!-- SVG Filter for distortion effect -->
   <svg style="position: absolute; width: 0; height: 0;">
     <filter id="glass-distortion">
       <feTurbulence type="turbulence" baseFrequency="0.006" numOctaves="2" result="turbulence"/>
-      <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="10" xChannelSelector="R" yChannelSelector="G"/>
+      <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="8" xChannelSelector="R" yChannelSelector="G"/>
     </filter>
   </svg>
 
@@ -114,7 +120,7 @@
     <div class="glass-noise"></div>
     <div class="glass-content">
       <h1>UI Document - Coming Soon</h1>
-      <p>This ultra-advanced LiquidGlass UI uses distortion, noise, blur, and translucency to look like futuristic glass.</p>
+      <p>This is a futuristic pink LiquidGlass UI panel with hover glow.</p>
     </div>
   </div>
 
