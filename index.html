@@ -243,6 +243,102 @@
     box-shadow:
       0 0 10px #9f64e1,
       inset 0 0 12px #7a32b8;
+/* Tabs */
+  .tabs {
+    display: flex;
+    background: #1a0a3c;
+    border-bottom: 1px solid #7a32b8;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 15px;
+    color: #9f64e1;
+    border-right: 1px solid #7a32b8;
+    user-select: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    text-shadow: 0 0 4px #7a32b8;
+  }
+  .tab:last-child {
+    border-right: none;
+  }
+  .tab.active {
+    background: #7a32b8;
+    color: #f0eaff;
+    text-shadow: 0 0 15px #d4bfff;
+  }
+
+  /* Tab content */
+  .tab-content {
+    padding: 20px;
+    color: #d4bfff;
+    min-height: 180px;
+    font-size: 14px;
+    line-height: 1.4;
+    user-select: text;
+    overflow-y: auto;
+  }
+
+  /* Button */
+  .btn {
+    display: inline-block;
+    background: #220048;
+    border: 2px solid #9f64e1;
+    padding: 10px 25px;
+    border-radius: 8px;
+    color: #b589ff;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+    box-shadow:
+      0 0 10px #9f64e1,
+      inset 0 0 15px #7a32b8;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    user-select: none;
+    margin-bottom: 15px;
+  }
+  .btn:hover {
+    background: #4800a3;
+    box-shadow:
+      0 0 18px #c29fff,
+      inset 0 0 25px #b589ff;
+    color: #fff;
+  }
+  .btn:active {
+    background: #320073;
+    box-shadow:
+      0 0 12px #7a32b8,
+      inset 0 0 20px #6f52b4;
+  }
+
+  /* Toggle switch */
+  .toggle {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+    margin-bottom: 15px;
+    user-select: none;
+  }
+  .toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #220048;
+    border: 2px solid #9f64e1;
+    border-radius: 26px;
+    box-shadow:
+      0 0 10px #9f64e1,
+      inset 0 0 12px #7a32b8;
     transition: background-color 0.3s ease;
   }
   .slider::before {
@@ -374,7 +470,7 @@
       <button class="btn" id="test-btn" type="button">Press Me</button>
 
       <!-- Toggle -->
-      <label class="toggle" for="toggle1">
+      <label class="toggle" for="toggle1" style="vertical-align: middle; cursor: pointer;">
         <input type="checkbox" id="toggle1" />
         <span class="slider" aria-label="Toggle setting"></span>
       </label>
@@ -493,7 +589,7 @@
       }
     });
 
-    // Keyboard navigation for dropdown
+    // Keyboard navigation for dropdown button
     dropdownBtn.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -501,5 +597,57 @@
       }
     });
 
+    // Keyboard navigation for dropdown options
+    let optionIndex = -1;
     dropdownList.addEventListener('keydown', (e) => {
-      let focusedIndex = Array.from(options).findIndex
+      const maxIndex = options.length - 1;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        optionIndex = (optionIndex + 1) > maxIndex ? 0 : optionIndex + 1;
+        options[optionIndex].focus();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        optionIndex = (optionIndex - 1) < 0 ? maxIndex : optionIndex - 1;
+        options[optionIndex].focus();
+      } else if (e.key === 'Escape') {
+        closeDropdown();
+        dropdownBtn.focus();
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (document.activeElement && document.activeElement.getAttribute('role') === 'option') {
+          selectOption(document.activeElement);
+        }
+      }
+    });
+
+    // Select dropdown option
+    function selectOption(option) {
+      dropdownBtn.textContent = option.textContent;
+      closeDropdown();
+      dropdownBtn.focus();
+    }
+
+    options.forEach(option => {
+      option.addEventListener('click', () => selectOption(option));
+      option.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          selectOption(e.target);
+        }
+      });
+    });
+
+    // Button example action
+    const btn = document.getElementById('test-btn');
+    btn.addEventListener('click', () => {
+      alert('Button Pressed!');
+    });
+
+    // Toggle example
+    const toggle = document.getElementById('toggle1');
+    toggle.addEventListener('change', () => {
+      alert(`Toggle is now ${toggle.checked ? 'ON' : 'OFF'}`);
+    });
+  </script>
+</body>
+</html>
