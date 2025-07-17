@@ -2,91 +2,110 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Black Neon Background</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dark Purple Neon Background</title>
   <style>
+    /* Reset */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
     html, body {
       height: 100%;
       background: #000;
       overflow: hidden;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
+    /* Background with subtle radial gradient for depth */
     .background {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle at center, #000 60%, #0a0a0a 100%);
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, #0a001f 60%, #000000 100%);
       z-index: -2;
     }
 
-    .glow-lines::before, .glow-lines::after {
+    /* Neon diagonal lines */
+    .glow-lines::before,
+    .glow-lines::after {
       content: "";
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: repeating-linear-gradient(
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-size: 80px 80px;
+      animation: moveLines 20s linear infinite;
+      opacity: 0.1;
+      z-index: -1;
+      mix-blend-mode: screen;
+    }
+
+    .glow-lines::before {
+      background-image: repeating-linear-gradient(
         45deg,
         transparent,
-        transparent 40px,
-        rgba(0, 255, 255, 0.03) 41px,
-        rgba(0, 255, 255, 0.03) 43px
+        transparent 45px,
+        rgba(138, 43, 226, 0.15) 46px,
+        rgba(138, 43, 226, 0.15) 48px
       );
-      animation: moveLines 15s linear infinite;
-      z-index: -1;
     }
 
     .glow-lines::after {
-      background: repeating-linear-gradient(
+      background-image: repeating-linear-gradient(
         -45deg,
         transparent,
-        transparent 40px,
-        rgba(255, 0, 255, 0.03) 41px,
-        rgba(255, 0, 255, 0.03) 43px
+        transparent 45px,
+        rgba(148, 0, 211, 0.15) 46px,
+        rgba(148, 0, 211, 0.15) 48px
       );
+      animation-direction: reverse;
     }
 
     @keyframes moveLines {
-      0% { background-position: 0 0; }
-      100% { background-position: 100% 100%; }
+      0% {
+        background-position: 0 0;
+      }
+      100% {
+        background-position: 80px 80px;
+      }
     }
 
+    /* Particle container */
     .particles {
-      position: absolute;
-      width: 100%;
-      height: 100%;
+      position: fixed;
+      inset: 0;
       pointer-events: none;
+      z-index: -1;
     }
 
+    /* Each particle */
     .particle {
       position: absolute;
-      width: 4px;
-      height: 4px;
       border-radius: 50%;
-      background: cyan;
-      box-shadow: 0 0 8px cyan;
-      animation: float 10s linear infinite;
+      background: #5a1a8a; /* dark purple base */
+      box-shadow:
+        0 0 8px 2px #7a32b8,
+        0 0 15px 5px #9f64e1,
+        0 0 25px 10px #b589ff;
+      opacity: 0.6;
+      filter: drop-shadow(0 0 6px #9f64e1);
+      animation: floatUp linear infinite;
     }
 
-    @keyframes float {
+    /* Floating animation */
+    @keyframes floatUp {
       0% {
         transform: translateY(100vh) scale(1);
         opacity: 0;
       }
       10% {
-        opacity: 1;
+        opacity: 0.7;
       }
       90% {
-        opacity: 1;
+        opacity: 0.7;
       }
       100% {
-        transform: translateY(-10vh) scale(0.5);
+        transform: translateY(-20vh) scale(0.6);
         opacity: 0;
       }
     }
@@ -98,14 +117,25 @@
 
   <script>
     const particleContainer = document.getElementById("particles");
-    const numParticles = 60;
+    const numParticles = 80;
 
     for (let i = 0; i < numParticles; i++) {
       const p = document.createElement("div");
       p.classList.add("particle");
+      // Random horizontal position
       p.style.left = `${Math.random() * 100}%`;
-      p.style.animationDuration = `${5 + Math.random() * 10}s`;
-      p.style.animationDelay = `${Math.random() * 5}s`;
+      // Random initial vertical position between bottom and top (to stagger appearance)
+      p.style.top = `${100 + Math.random() * 50}vh`;
+      // Random size between 3 and 7px
+      const size = 3 + Math.random() * 4;
+      p.style.width = `${size}px`;
+      p.style.height = `${size}px`;
+      // Random animation duration between 8s and 15s
+      p.style.animationDuration = `${8 + Math.random() * 7}s`;
+      // Random animation delay to stagger particles
+      p.style.animationDelay = `${Math.random() * 15}s`;
+      // Random opacity variation for natural effect
+      p.style.opacity = 0.4 + Math.random() * 0.6;
       particleContainer.appendChild(p);
     }
   </script>
