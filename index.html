@@ -3,19 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dark Purple Neon Background</title>
+  <title>Dark Purple Neon UI</title>
   <style>
     /* Reset */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      user-select: none;
     }
     html, body {
       height: 100%;
       background: #000;
       overflow: hidden;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #b589ff;
     }
 
     /* Background with subtle radial gradient for depth */
@@ -23,7 +25,7 @@
       position: fixed;
       inset: 0;
       background: radial-gradient(circle at center, #0a001f 60%, #000000 100%);
-      z-index: -2;
+      z-index: -3;
     }
 
     /* Neon diagonal lines */
@@ -36,7 +38,7 @@
       background-size: 80px 80px;
       animation: moveLines 20s linear infinite;
       opacity: 0.1;
-      z-index: -1;
+      z-index: -2;
       mix-blend-mode: screen;
     }
 
@@ -90,6 +92,7 @@
       opacity: 0.6;
       filter: drop-shadow(0 0 6px #9f64e1);
       animation: floatUp linear infinite;
+      will-change: transform, opacity;
     }
 
     /* Floating animation */
@@ -109,35 +112,168 @@
         opacity: 0;
       }
     }
+
+    /* UI Container */
+    .ui-container {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      width: 320px;
+      background: rgba(20, 0, 40, 0.7);
+      border: 2px solid #7a32b8;
+      border-radius: 10px;
+      box-shadow: 0 0 20px #9f64e1;
+      backdrop-filter: blur(10px);
+      user-select: none;
+      color: #b589ff;
+      z-index: 10;
+    }
+
+    /* Title and version */
+    .ui-header {
+      padding: 15px 20px 10px 20px;
+      border-bottom: 1px solid #7a32b8;
+    }
+    .ui-title {
+      font-size: 22px;
+      font-weight: 700;
+      text-shadow: 0 0 8px #b589ff;
+    }
+    .ui-version {
+      font-size: 12px;
+      color: #a97ce6;
+      margin-top: 2px;
+      text-shadow: 0 0 5px #7a32b8;
+    }
+
+    /* Tabs container */
+    .tabs {
+      display: flex;
+      background: #1a0a3c;
+      border-bottom: 1px solid #7a32b8;
+    }
+
+    /* Each tab */
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px 0;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 15px;
+      color: #9f64e1;
+      border-right: 1px solid #7a32b8;
+      user-select: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      text-shadow: 0 0 4px #7a32b8;
+    }
+
+    .tab:last-child {
+      border-right: none;
+    }
+
+    .tab.active {
+      background: #7a32b8;
+      color: #f0eaff;
+      text-shadow: 0 0 15px #d4bfff;
+    }
+
+    /* Tab content */
+    .tab-content {
+      padding: 20px;
+      color: #d4bfff;
+      min-height: 140px;
+      font-size: 14px;
+      line-height: 1.4;
+      user-select: text;
+    }
+
   </style>
 </head>
 <body>
   <div class="background glow-lines"></div>
   <div class="particles" id="particles"></div>
 
+  <div class="ui-container" role="region" aria-label="Neon UI window">
+    <div class="ui-header">
+      <div class="ui-title">Neon UI</div>
+      <div class="ui-version">v1.0.0</div>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Main navigation tabs">
+      <div class="tab active" role="tab" tabindex="0" aria-selected="true" aria-controls="tab1-content" id="tab1">Home</div>
+      <div class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab2-content" id="tab2">Settings</div>
+      <div class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab3-content" id="tab3">About</div>
+    </div>
+
+    <div id="tab1-content" class="tab-content" role="tabpanel" aria-labelledby="tab1">
+      Welcome to the Neon UI! This is the Home tab content area.
+    </div>
+    <div id="tab2-content" class="tab-content" role="tabpanel" aria-labelledby="tab2" hidden>
+      Adjust your settings here. This is just a placeholder for demonstration.
+    </div>
+    <div id="tab3-content" class="tab-content" role="tabpanel" aria-labelledby="tab3" hidden>
+      Neon UI version 1.0.0<br/>
+      Created with a cool dark purple neon background.
+    </div>
+  </div>
+
   <script>
+    // Particle generation and animation fix
     const particleContainer = document.getElementById("particles");
     const numParticles = 80;
 
     for (let i = 0; i < numParticles; i++) {
       const p = document.createElement("div");
       p.classList.add("particle");
-      // Random horizontal position
       p.style.left = `${Math.random() * 100}%`;
-      // Random initial vertical position between bottom and top (to stagger appearance)
-      p.style.top = `${100 + Math.random() * 50}vh`;
-      // Random size between 3 and 7px
+      p.style.top = `${100 + Math.random() * 50}vh`; // start below viewport for floatUp animation
       const size = 3 + Math.random() * 4;
       p.style.width = `${size}px`;
       p.style.height = `${size}px`;
-      // Random animation duration between 8s and 15s
       p.style.animationDuration = `${8 + Math.random() * 7}s`;
-      // Random animation delay to stagger particles
       p.style.animationDelay = `${Math.random() * 15}s`;
-      // Random opacity variation for natural effect
       p.style.opacity = 0.4 + Math.random() * 0.6;
       particleContainer.appendChild(p);
     }
+
+    // Tabs logic
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Deactivate all tabs
+        tabs.forEach(t => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+          t.setAttribute('tabindex', '-1');
+        });
+
+        // Hide all tab contents
+        tabContents.forEach(content => content.hidden = true);
+
+        // Activate clicked tab and show its content
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        tab.setAttribute('tabindex', '0');
+        const contentId = tab.getAttribute('aria-controls');
+        document.getElementById(contentId).hidden = false;
+        tab.focus();
+      });
+
+      // Keyboard navigation (left/right arrows)
+      tab.addEventListener('keydown', (e) => {
+        let index = Array.from(tabs).indexOf(e.target);
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          tabs[(index + 1) % tabs.length].click();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          tabs[(index - 1 + tabs.length) % tabs.length].click();
+        }
+      });
+    });
   </script>
 </body>
 </html>
