@@ -40,6 +40,7 @@
       color: #fff;
       cursor: pointer;
       transition: 0.3s;
+      margin-right: 10px;
     }
     button:hover {
       background: #ff9800;
@@ -56,13 +57,19 @@
       word-wrap: break-word;
       min-height: 60px;
     }
+    .button-group {
+      display: flex;
+      justify-content: center;
+    }
   </style>
 </head>
 <body>
   <h1>Custom Language Converter</h1>
   <textarea id="inputText" placeholder="Type text here..."></textarea>
-  <br>
-  <button onclick="convertText()">Convert</button>
+  <div class="button-group">
+    <button onclick="convertText()">Convert</button>
+    <button onclick="unconvertText()">Unconvert</button>
+  </div>
   <div id="output"></div>
 
   <script>
@@ -73,14 +80,32 @@
       'y': 'Ɓ','z': 'Ⱥ'
     };
 
+    // Build reverse map for unconverting
+    const reverseMapping = {};
+    for (let key in mapping) {
+      reverseMapping[mapping[key]] = key;
+    }
+
     function convertText() {
       const input = document.getElementById("inputText").value;
       let output = "";
       for (let char of input) {
         const lower = char.toLowerCase();
         if (mapping[lower]) {
-          // Preserve case (optional)
           output += mapping[lower];
+        } else {
+          output += char;
+        }
+      }
+      document.getElementById("output").innerText = output;
+    }
+
+    function unconvertText() {
+      const input = document.getElementById("inputText").value;
+      let output = "";
+      for (let char of input) {
+        if (reverseMapping[char]) {
+          output += reverseMapping[char];
         } else {
           output += char;
         }
