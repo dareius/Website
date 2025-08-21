@@ -1,653 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Dark Purple Neon Roblox-Style GUI</title>
-<style>
-  /* Reset */
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    user-select: none;
-  }
-  html, body {
-    height: 100%;
-    background: #000;
-    overflow: hidden;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #b589ff;
-  }
-
-  /* Background with subtle radial gradient */
-  .background {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at center, #0a001f 60%, #000000 100%);
-    z-index: -3;
-  }
-
-  /* Neon diagonal lines */
-  .glow-lines::before,
-  .glow-lines::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background-size: 80px 80px;
-    animation: moveLines 20s linear infinite;
-    opacity: 0.1;
-    z-index: -2;
-    mix-blend-mode: screen;
-  }
-
-  .glow-lines::before {
-    background-image: repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 45px,
-      rgba(138, 43, 226, 0.15) 46px,
-      rgba(138, 43, 226, 0.15) 48px
-    );
-  }
-
-  .glow-lines::after {
-    background-image: repeating-linear-gradient(
-      -45deg,
-      transparent,
-      transparent 45px,
-      rgba(148, 0, 211, 0.15) 46px,
-      rgba(148, 0, 211, 0.15) 48px
-    );
-    animation-direction: reverse;
-  }
-
-  @keyframes moveLines {
-    0% {
-      background-position: 0 0;
+  <meta charset="UTF-8">
+  <title>Custom Language Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #2b1055, #7597de);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
     }
-    100% {
-      background-position: 80px 80px;
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 20px;
     }
-  }
-
-  /* Particles */
-  .particles {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: -1;
-  }
-
-  .particle {
-    position: absolute;
-    border-radius: 50%;
-    background: #5a1a8a;
-    box-shadow:
-      0 0 8px 2px #7a32b8,
-      0 0 15px 5px #9f64e1,
-      0 0 25px 10px #b589ff;
-    opacity: 0.6;
-    filter: drop-shadow(0 0 6px #9f64e1);
-    animation: floatUp linear infinite;
-    will-change: transform, opacity;
-  }
-
-  @keyframes floatUp {
-    0% {
-      transform: translateY(100vh) scale(1);
-      opacity: 0;
+    textarea {
+      width: 80%;
+      max-width: 600px;
+      height: 120px;
+      padding: 12px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      resize: none;
+      outline: none;
     }
-    10% {
-      opacity: 0.7;
+    button {
+      margin-top: 15px;
+      padding: 12px 24px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      background: #ff7b00;
+      color: #fff;
+      cursor: pointer;
+      transition: 0.3s;
     }
-    90% {
-      opacity: 0.7;
+    button:hover {
+      background: #ff9800;
+      transform: scale(1.05);
     }
-    100% {
-      transform: translateY(-20vh) scale(0.6);
-      opacity: 0;
+    #output {
+      margin-top: 20px;
+      font-size: 1.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 10px;
+      width: 80%;
+      max-width: 600px;
+      word-wrap: break-word;
+      min-height: 60px;
     }
-  }
-
-  /* UI container */
-  .ui-container {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    width: 340px;
-    background: #0b0018; /* solid black-ish */
-    border: 2px solid #7a32b8;
-    border-radius: 12px;
-    box-shadow: 0 0 20px #9f64e1;
-    backdrop-filter: blur(8px);
-    user-select: none;
-    color: #b589ff;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Header */
-  .ui-header {
-    padding: 15px 20px 10px 20px;
-    border-bottom: 1px solid #7a32b8;
-  }
-  .ui-title {
-    font-size: 22px;
-    font-weight: 700;
-    text-shadow: 0 0 8px #b589ff;
-  }
-  .ui-version {
-    font-size: 12px;
-    color: #a97ce6;
-    margin-top: 2px;
-    text-shadow: 0 0 5px #7a32b8;
-  }
-
-  /* Tabs */
-  .tabs {
-    display: flex;
-    background: #1a0a3c;
-    border-bottom: 1px solid #7a32b8;
-  }
-  .tab {
-    flex: 1;
-    text-align: center;
-    padding: 10px 0;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 15px;
-    color: #9f64e1;
-    border-right: 1px solid #7a32b8;
-    user-select: none;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    text-shadow: 0 0 4px #7a32b8;
-  }
-  .tab:last-child {
-    border-right: none;
-  }
-  .tab.active {
-    background: #7a32b8;
-    color: #f0eaff;
-    text-shadow: 0 0 15px #d4bfff;
-  }
-
-  /* Tab content */
-  .tab-content {
-    padding: 20px;
-    color: #d4bfff;
-    min-height: 180px;
-    font-size: 14px;
-    line-height: 1.4;
-    user-select: text;
-    overflow-y: auto;
-  }
-
-  /* Button */
-  .btn {
-    display: inline-block;
-    background: #220048;
-    border: 2px solid #9f64e1;
-    padding: 10px 25px;
-    border-radius: 8px;
-    color: #b589ff;
-    font-weight: 700;
-    font-size: 14px;
-    cursor: pointer;
-    text-align: center;
-    box-shadow:
-      0 0 10px #9f64e1,
-      inset 0 0 15px #7a32b8;
-    transition: background-color 0.3s, box-shadow 0.3s;
-    user-select: none;
-    margin-bottom: 15px;
-    user-select: none;
-  }
-  .btn:hover {
-    background: #4800a3;
-    box-shadow:
-      0 0 18px #c29fff,
-      inset 0 0 25px #b589ff;
-    color: #fff;
-  }
-  .btn:active {
-    background: #320073;
-    box-shadow:
-      0 0 12px #7a32b8,
-      inset 0 0 20px #6f52b4;
-  }
-
-  /* Toggle switch */
-  .toggle {
-    position: relative;
-    display: inline-block;
-    width: 48px;
-    height: 26px;
-    margin-bottom: 15px;
-    user-select: none;
-  }
-  .toggle input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-  .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #220048;
-    border: 2px solid #9f64e1;
-    border-radius: 26px;
-    box-shadow:
-      0 0 10px #9f64e1,
-      inset 0 0 12px #7a32b8;
-/* Tabs */
-  .tabs {
-    display: flex;
-    background: #1a0a3c;
-    border-bottom: 1px solid #7a32b8;
-  }
-  .tab {
-    flex: 1;
-    text-align: center;
-    padding: 10px 0;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 15px;
-    color: #9f64e1;
-    border-right: 1px solid #7a32b8;
-    user-select: none;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    text-shadow: 0 0 4px #7a32b8;
-  }
-  .tab:last-child {
-    border-right: none;
-  }
-  .tab.active {
-    background: #7a32b8;
-    color: #f0eaff;
-    text-shadow: 0 0 15px #d4bfff;
-  }
-
-  /* Tab content */
-  .tab-content {
-    padding: 20px;
-    color: #d4bfff;
-    min-height: 180px;
-    font-size: 14px;
-    line-height: 1.4;
-    user-select: text;
-    overflow-y: auto;
-  }
-
-  /* Button */
-  .btn {
-    display: inline-block;
-    background: #220048;
-    border: 2px solid #9f64e1;
-    padding: 10px 25px;
-    border-radius: 8px;
-    color: #b589ff;
-    font-weight: 700;
-    font-size: 14px;
-    cursor: pointer;
-    text-align: center;
-    box-shadow:
-      0 0 10px #9f64e1,
-      inset 0 0 15px #7a32b8;
-    transition: background-color 0.3s, box-shadow 0.3s;
-    user-select: none;
-    margin-bottom: 15px;
-  }
-  .btn:hover {
-    background: #4800a3;
-    box-shadow:
-      0 0 18px #c29fff,
-      inset 0 0 25px #b589ff;
-    color: #fff;
-  }
-  .btn:active {
-    background: #320073;
-    box-shadow:
-      0 0 12px #7a32b8,
-      inset 0 0 20px #6f52b4;
-  }
-
-  /* Toggle switch */
-  .toggle {
-    position: relative;
-    display: inline-block;
-    width: 48px;
-    height: 26px;
-    margin-bottom: 15px;
-    user-select: none;
-  }
-  .toggle input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-  .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #220048;
-    border: 2px solid #9f64e1;
-    border-radius: 26px;
-    box-shadow:
-      0 0 10px #9f64e1,
-      inset 0 0 12px #7a32b8;
-    transition: background-color 0.3s ease;
-  }
-  .slider::before {
-    position: absolute;
-    content: "";
-    height: 22px;
-    width: 22px;
-    left: 2px;
-    bottom: 1px;
-    background-color: #b589ff;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #c3b7ff;
-    transition: transform 0.3s ease, background-color 0.3s ease;
-  }
-  .toggle input:checked + .slider {
-    background-color: #7a32b8;
-    box-shadow:
-      0 0 20px #c29fff,
-      inset 0 0 15px #b589ff;
-  }
-  .toggle input:checked + .slider::before {
-    transform: translateX(22px);
-    background-color: #f0eaff;
-    box-shadow: 0 0 12px #fff;
-  }
-
-  /* Dropdown */
-  .dropdown {
-    position: relative;
-    user-select: none;
-    width: 100%;
-    margin-bottom: 15px;
-  }
-  .dropdown-btn {
-    background: #220048;
-    border: 2px solid #9f64e1;
-    border-radius: 8px;
-    padding: 10px 15px;
-    font-size: 14px;
-    color: #b589ff;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow:
-      0 0 10px #9f64e1,
-      inset 0 0 15px #7a32b8;
-    transition: background-color 0.3s;
-  }
-  .dropdown-btn:hover {
-    background: #4800a3;
-    color: #fff;
-  }
-  .dropdown-btn:after {
-    content: "▼";
-    font-size: 12px;
-    margin-left: 8px;
-    transition: transform 0.3s ease;
-    color: #b589ff;
-  }
-  .dropdown.open .dropdown-btn:after {
-    transform: rotate(-180deg);
-  }
-  .dropdown-list {
-    position: absolute;
-    top: 110%;
-    left: 0;
-    right: 0;
-    background: #11002b;
-    border: 2px solid #9f64e1;
-    border-radius: 8px;
-    max-height: 140px;
-    overflow-y: auto;
-    box-shadow:
-      0 0 15px #9f64e1;
-    z-index: 20;
-    opacity: 0;
-    pointer-events: none;
-    transform-origin: top center;
-    transform: scaleY(0.8);
-    transition: opacity 0.25s ease, transform 0.25s ease;
-  }
-  .dropdown.open .dropdown-list {
-    opacity: 1;
-    pointer-events: auto;
-    transform: scaleY(1);
-  }
-  .dropdown-list div {
-    padding: 10px 15px;
-    cursor: pointer;
-    color: #b589ff;
-    font-size: 14px;
-    border-bottom: 1px solid #7a32b8;
-    transition: background-color 0.2s ease;
-  }
-  .dropdown-list div:last-child {
-    border-bottom: none;
-  }
-  .dropdown-list div:hover {
-    background: #7a32b8;
-    color: #f0eaff;
-  }
-</style>
+  </style>
 </head>
 <body>
-  <div class="background glow-lines"></div>
-  <div class="particles" id="particles"></div>
-
-  <div class="ui-container" role="region" aria-label="Neon UI window">
-    <div class="ui-header">
-      <div class="ui-title">Neon UI</div>
-      <div class="ui-version">v1.0.0</div>
-    </div>
-
-    <div class="tabs" role="tablist" aria-label="Main navigation tabs">
-      <div class="tab active" role="tab" tabindex="0" aria-selected="true" aria-controls="tab1-content" id="tab1">Home</div>
-      <div class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab2-content" id="tab2">Settings</div>
-      <div class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab3-content" id="tab3">About</div>
-    </div>
-
-    <div id="tab1-content" class="tab-content" role="tabpanel" aria-labelledby="tab1">
-      Welcome to the Neon UI! This is the Home tab content area.
-      <br /><br />
-      Try switching to Settings to see interactive controls.
-    </div>
-
-    <div id="tab2-content" class="tab-content" role="tabpanel" aria-labelledby="tab2" hidden>
-      <!-- Button -->
-      <button class="btn" id="test-btn" type="button">Press Me</button>
-
-      <!-- Toggle -->
-      <label class="toggle" for="toggle1" style="vertical-align: middle; cursor: pointer;">
-        <input type="checkbox" id="toggle1" />
-        <span class="slider" aria-label="Toggle setting"></span>
-      </label>
-      <span style="margin-left: 10px; vertical-align: middle; font-size: 14px;">Enable Feature</span>
-
-      <!-- Dropdown -->
-      <div class="dropdown" id="dropdown1" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="dropdown-label">
-        <div class="dropdown-btn" id="dropdown-label" aria-controls="dropdown-list" aria-describedby="dropdown-desc" role="button" aria-haspopup="listbox" aria-expanded="false" tabindex="0">
-          Select option
-        </div>
-        <div class="dropdown-list" id="dropdown-list" role="listbox" tabindex="-1">
-          <div role="option" tabindex="0" data-value="option1">Option 1</div>
-          <div role="option" tabindex="0" data-value="option2">Option 2</div>
-          <div role="option" tabindex="0" data-value="option3">Option 3</div>
-          <div role="option" tabindex="0" data-value="option4">Option 4</div>
-        </div>
-      </div>
-    </div>
-
-    <div id="tab3-content" class="tab-content" role="tabpanel" aria-labelledby="tab3" hidden>
-      Neon UI version 1.0.0<br/>
-      Created with a cool dark purple neon background.<br/><br/>
-      Features:
-      <ul>
-        <li>Buttons</li>
-        <li>Toggles</li>
-        <li>Dropdowns</li>
-        <li>Neon style UI</li>
-      </ul>
-    </div>
-  </div>
+  <h1>Custom Language Converter</h1>
+  <textarea id="inputText" placeholder="Type text here..."></textarea>
+  <br>
+  <button onclick="convertText()">Convert</button>
+  <div id="output"></div>
 
   <script>
-    // Particle setup
-    const particleContainer = document.getElementById("particles");
-    const numParticles = 80;
+    const mapping = {
+      'a': 'Ƶ','b': 'Ƴ','c': 'ⵝ','d': 'Ɯ','e': 'Ѵ','f': 'Ʉ','g': 'Ŧ','h': 'Ϟ',
+      'i': 'Я','j': 'Ꝗ','k': 'Ᵽ','l': 'Ø','m': 'Ŋ','n': 'ϻ','o': 'Ⱡ','p': 'Ꞣ',
+      'q': 'Ɉ','r': 'Ɨ','s': 'Ɦ','t': 'Ǥ','u': 'Ƒ','v': 'Ɇ','w': 'Đ','x': 'Ͼ',
+      'y': 'Ɓ','z': 'Ⱥ'
+    };
 
-    for (let i = 0; i < numParticles; i++) {
-      const p = document.createElement("div");
-      p.classList.add("particle");
-      p.style.left = `${Math.random() * 100}%`;
-      p.style.top = `${100 + Math.random() * 50}vh`; 
-      const size = 3 + Math.random() * 4;
-      p.style.width = `${size}px`;
-      p.style.height = `${size}px`;
-      p.style.animationDuration = `${8 + Math.random() * 7}s`;
-      p.style.animationDelay = `${Math.random() * 15}s`;
-      p.style.opacity = 0.4 + Math.random() * 0.6;
-      particleContainer.appendChild(p);
-    }
-
-    // Tabs logic
-    const tabs = document.querySelectorAll('.tab');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => {
-          t.classList.remove('active');
-          t.setAttribute('aria-selected', 'false');
-          t.setAttribute('tabindex', '-1');
-        });
-        tabContents.forEach(content => content.hidden = true);
-
-        tab.classList.add('active');
-        tab.setAttribute('aria-selected', 'true');
-        tab.setAttribute('tabindex', '0');
-        const contentId = tab.getAttribute('aria-controls');
-        document.getElementById(contentId).hidden = false;
-        tab.focus();
-      });
-
-      // Keyboard navigation left/right
-      tab.addEventListener('keydown', (e) => {
-        let index = Array.from(tabs).indexOf(e.target);
-        if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          tabs[(index + 1) % tabs.length].click();
-        } else if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          tabs[(index - 1 + tabs.length) % tabs.length].click();
-        }
-      });
-    });
-
-    // Dropdown logic
-    const dropdown = document.getElementById('dropdown1');
-    const dropdownBtn = dropdown.querySelector('.dropdown-btn');
-    const dropdownList = dropdown.querySelector('.dropdown-list');
-    const options = dropdownList.querySelectorAll('div');
-
-    function closeDropdown() {
-      dropdown.classList.remove('open');
-      dropdownBtn.setAttribute('aria-expanded', 'false');
-      dropdownList.setAttribute('aria-hidden', 'true');
-    }
-    function openDropdown() {
-      dropdown.classList.add('open');
-      dropdownBtn.setAttribute('aria-expanded', 'true');
-      dropdownList.setAttribute('aria-hidden', 'false');
-      dropdownList.focus();
-    }
-
-    dropdownBtn.addEventListener('click', () => {
-      if (dropdown.classList.contains('open')) {
-        closeDropdown();
-      } else {
-        openDropdown();
-      }
-    });
-
-    // Close dropdown on outside click
-    document.addEventListener('click', (e) => {
-      if (!dropdown.contains(e.target)) {
-        closeDropdown();
-      }
-    });
-
-    // Keyboard navigation for dropdown button
-    dropdownBtn.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        openDropdown();
-      }
-    });
-
-    // Keyboard navigation for dropdown options
-    let optionIndex = -1;
-    dropdownList.addEventListener('keydown', (e) => {
-      const maxIndex = options.length - 1;
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        optionIndex = (optionIndex + 1) > maxIndex ? 0 : optionIndex + 1;
-        options[optionIndex].focus();
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        optionIndex = (optionIndex - 1) < 0 ? maxIndex : optionIndex - 1;
-        options[optionIndex].focus();
-      } else if (e.key === 'Escape') {
-        closeDropdown();
-        dropdownBtn.focus();
-      } else if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        if (document.activeElement && document.activeElement.getAttribute('role') === 'option') {
-          selectOption(document.activeElement);
+    function convertText() {
+      const input = document.getElementById("inputText").value;
+      let output = "";
+      for (let char of input) {
+        const lower = char.toLowerCase();
+        if (mapping[lower]) {
+          // Preserve case (optional)
+          output += mapping[lower];
+        } else {
+          output += char;
         }
       }
-    });
-
-    // Select dropdown option
-    function selectOption(option) {
-      dropdownBtn.textContent = option.textContent;
-      closeDropdown();
-      dropdownBtn.focus();
+      document.getElementById("output").innerText = output;
     }
-
-    options.forEach(option => {
-      option.addEventListener('click', () => selectOption(option));
-      option.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          selectOption(e.target);
-        }
-      });
-    });
-
-    // Button example action
-    const btn = document.getElementById('test-btn');
-    btn.addEventListener('click', () => {
-      alert('Button Pressed!');
-    });
-
-    // Toggle example
-    const toggle = document.getElementById('toggle1');
-    toggle.addEventListener('change', () => {
-      alert(`Toggle is now ${toggle.checked ? 'ON' : 'OFF'}`);
-    });
   </script>
 </body>
 </html>
