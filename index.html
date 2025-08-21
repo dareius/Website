@@ -30,6 +30,14 @@
       resize: none;
       outline: none;
     }
+    select {
+      margin-top: 15px;
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
     .button-group {
       display: flex;
       justify-content: center;
@@ -68,6 +76,12 @@
   <h1>Custom Language Converter</h1>
   <textarea id="inputText" placeholder="Type text here..."></textarea>
   
+  <select id="languageSelect">
+    <option value="lang1">Secret Language 1</option>
+    <option value="lang2">Secret Language 2</option>
+    <option value="lang3">Secret Language 3</option>
+  </select>
+  
   <div class="button-group">
     <button onclick="convertText()">Convert</button>
     <button onclick="unconvertText()">Unconvert</button>
@@ -77,21 +91,44 @@
   <div id="output"></div>
 
   <script>
-    const mapping = {
-      'a': 'Ƶ','b': 'Ƴ','c': 'ⵝ','d': 'Ɯ','e': 'Ѵ','f': 'Ʉ','g': 'Ŧ','h': 'Ϟ',
-      'i': 'Я','j': 'Ꝗ','k': 'Ᵽ','l': 'Ø','m': 'Ŋ','n': 'ϻ','o': 'Ⱡ','p': 'Ꞣ',
-      'q': 'Ɉ','r': 'Ɨ','s': 'Ɦ','t': 'Ǥ','u': 'Ƒ','v': 'Ɇ','w': 'Đ','x': 'Ͼ',
-      'y': 'Ɓ','z': 'Ⱥ'
+    // Multiple language mappings
+    const languages = {
+      lang1: {
+        'a':'Ƶ','b':'Ƴ','c':'ⵝ','d':'Ɯ','e':'Ѵ','f':'Ʉ','g':'Ŧ','h':'Ϟ',
+        'i':'Я','j':'Ꝗ','k':'Ᵽ','l':'Ø','m':'Ŋ','n':'ϻ','o':'Ⱡ','p':'Ꞣ',
+        'q':'Ɉ','r':'Ɨ','s':'Ɦ','t':'Ǥ','u':'Ƒ','v':'Ɇ','w':'Đ','x':'Ͼ',
+        'y':'Ɓ','z':'Ⱥ'
+      },
+      lang2: {
+        'a':'λ','b':'δ','c':'ζ','d':'φ','e':'ε','f':'ψ','g':'γ','h':'η',
+        'i':'ι','j':'ϳ','k':'κ','l':'λ','m':'μ','n':'ν','o':'ο','p':'ρ',
+        'q':'ϙ','r':'π','s':'σ','t':'τ','u':'υ','v':'ν','w':'ω','x':'χ',
+        'y':'ϒ','z':'ζ'
+      },
+      lang3: {
+        'a':'ա','b':'բ','c':'ց','d':'դ','e':'ե','f':'ֆ','g':'գ','h':'հ',
+        'i':'ի','j':'ջ','k':'կ','l':'լ','m':'մ','n':'ն','o':'օ','p':'պ',
+        'q':'ք','r':'ռ','s':'ս','t':'տ','u':'ւ','v':'վ','w':'շ','x':'խ',
+        'y':'յ','z':'զ'
+      }
     };
 
-    // Reverse map for unconverting
-    const reverseMapping = {};
-    for (let key in mapping) {
-      reverseMapping[mapping[key]] = key;
+    function getCurrentMapping() {
+      const lang = document.getElementById("languageSelect").value;
+      return languages[lang];
+    }
+
+    function getReverseMapping(mapping) {
+      const reverse = {};
+      for (let key in mapping) {
+        reverse[mapping[key]] = key;
+      }
+      return reverse;
     }
 
     function convertText() {
       const input = document.getElementById("inputText").value;
+      const mapping = getCurrentMapping();
       let output = "";
       for (let char of input) {
         const lower = char.toLowerCase();
@@ -106,6 +143,8 @@
 
     function unconvertText() {
       const input = document.getElementById("inputText").value;
+      const mapping = getCurrentMapping();
+      const reverseMapping = getReverseMapping(mapping);
       let output = "";
       for (let char of input) {
         if (reverseMapping[char]) {
