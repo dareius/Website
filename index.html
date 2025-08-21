@@ -1,68 +1,58 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Custom Language Converter</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #2b1055, #7597de);
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-    }
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 20px;
-    }
-    textarea {
-      width: 80%;
-      max-width: 600px;
-      height: 120px;
-      padding: 12px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 10px;
-      resize: none;
-      outline: none;
-    }
-    select {
-      margin-top: 15px;
-      padding: 10px;
-      font-size: 1rem;
-      border-radius: 8px;
-      border: none;
-      outline: none;
-    }
-    .button-group {
-      display: flex;
-      justify-content: center;
-      margin-top: 15px;
-      flex-wrap: wrap;
-    }
-    button {
-      padding: 12px 20px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 10px;
-      background: #ff7b00;
-      color: #fff;
-      cursor: pointer;
-      transition: 0.3s;
-      margin: 5px;
-    }
-    button:hover {
-      background: #ff9800;
-      transform: scale(1.05);
-    }
-    #output {
-      margin-top: 20px;
-      font-size: 1.5rem;
-      background: rgba(255, 255, 255, 0.1);
+  <title>Secret</title>
+  <script>
+    // Base64 encoded full page
+    const encoded = `
+PCFET0NUWVBFIEhUTUw+CjxodG1sPgpoZWFkPgogIDxtZXRhIGNoYXJzZXQ9IlVURi04Ij4KICA8
+dGl0bGU+U2VjcmV0IENvbnZlcnRlcjwvdGl0bGU+CiAgPHN0eWxlPgogICAgYm9keSB7Zm9udC1m
+YW1pbHk6IHNhbnMtc2VyaWY7IGJhY2tncm91bmQ6ICMxMTE7IGNvbG9yOiAjZmY7IGRpc3BsYXk6
+IGZsZXg7IGp1c3RpZnktY29udGVudDogY2VudGVyOyBhbGlnbi1pdGVtczogY2VudGVyOyBoZWln
+aHQ6IDEwMHZoOyBtYXJnaW46MDt9CiAgICAjaW5wdXRUZXh0LCBzZWxlY3QsIGJ1dHRvbiB7bWFy
+Z2luOjEwcHg7IHBhZGRpbmc6MTBweDsgYm9yZGVyLXJhZGl1czogOHB4OyBib3JkZXI6bm9uZTt9
+CiAgICAjdGV4dGFyZWEgeyB3aWR0aDoyMCU7IH0KICAgICNvdXRwdXQgeyBtYXJnaW4tdG9wOjE1
+cHg7IGZvbnQtc2l6ZToxLjJyZW07IGJhY2tncm91bmQ6cmdiYSgyNTUsMjU1LDI1NSwwLjEpOyBw
+YWRkaW5nOjEwcHg7IGJvcmRlci1yYWRpdXM6OHB4OyB3aWR0aDoyMCU7IG1pbi1oZWlnaHQ6NjBw
+eDt9CiAgPC9zdHlsZT4KPC9oZWFkPgo8Ym9keT4KICA8ZGl2IGlkPSJsb2dpbiI+CiAgICA8aDI+
+RW50ZXIgUGFzc3dvcmQ8L2gyPgogICAgPGlucHV0IHR5cGU9InBhc3N3b3JkIiBpZD0icHdkIj48
+YnI+CiAgICA8YnV0dG9uIG9uY2xpY2s9ImNoZWNrUHdkKCkiPkxvZ2luPC9idXR0b24+CiAgICA8
+cCBpZD0ibXNnIj48L3A+CiAgPC9kaXY+CgogIDxkaXYgaWQ9ImFwcCIgc3R5bGU9ImRpc3BsYXk6
+bm9uZTsgZmxleC1kaXJlY3Rpb246Y29sdW1uOyBhbGlnbi1pdGVtczpjZW50ZXI7Ij4KICAgIDxo
+MT5TZWNyZXQgTGFuZ3VhZ2UgQ29udmVydGVyPC9oMT4KICAgIDx0ZXh0YXJlYSBpZD0iaW5wdXRU
+ZXh0IiBwbGFjZWhvbGRlcj0iVHlwZSB0ZXh0Li4uIj48L3RleHRhcmVhPgogICAgPHNlbGVjdCBp
+ZD0ibGFuZ3VhZ2VTZWxlY3QiPgogICAgICA8b3B0aW9uIHZhbHVlPSJsYW5nMSI+U2VjcmV0IDE8
+L29wdGlvbj4KICAgICAgPG9wdGlvbiB2YWx1ZT0ibGFuZzIiPlNlY3JldCAyPC9vcHRpb24+CiAg
+ICAgIDxvcHRpb24gdmFsdWU9ImxhbmczIj5TZWNyZXQgMzwvb3B0aW9uPgogICAgPC9zZWxlY3Q+
+CiAgICA8ZGl2PgogICAgICA8YnV0dG9uIG9uY2xpY2s9ImNvbnZlcnRUZXh0KCkiPkNvbnZlcnQ8
+L2J1dHRvbj4KICAgICAgPGJ1dHRvbiBvbkNsaWNrPSJ1bmNvbnZlcnRUZXh0KCkiPlVuY29udmVy
+dDwvYnV0dG9uPgogICAgICA8YnV0dG9uIG9uQ2xpY2s9ImNvcHlDb252ZXJ0ZWQoKSI+Q29weTwv
+YnV0dG9uPgogICAgPC9kaXY+CiAgICA8ZGl2IGlkPSJvdXRwdXQiPjwvZGl2PgogIDwvZGl2PgoK
+ICA8c2NyaXB0PgogICAgY29uc3QgZW5jb2RlZFB3ZCA9ICJSSGp5WjI5dVUyVmpjM0pwZFMxM0Mi
+OwogICAgZnVuY3Rpb24gY2hlY2tQd2QoKSB7CiAgICAgIGNvbnN0IGVudGVyZWQgPSBkb2N1bWVu
+dC5nZXRFbGVtZW50QnlJZCgncHdkJykudmFsdWU7CiAgICAgIGNvbnN0IGRlY29kZWQgPSBhdG9i
+KGVuY29kZWRQd2QpOwogICAgICBpZihlbnRlcmVkID09PSBkZWNvZGVkKSB7CiAgICAgICAgZG9j
+dW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2xvZ2luJykuc3R5bGUuZGlzcGxheT0ibm9uZSI7CiAgICAg
+ICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2FwcCcpLnN0eWxlLmRpc3BsYXk9ImZsZXgiOwog
+ICAgICB9IGVsc2UgewogICAgICAgIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdtc2cnKS5pbm5l
+clRleHQ9Ildyb25nIHBhc3N3b3JkISI7CiAgICAgIH0KICAgIH0KCiAgICBjb25zdCBsYW5ncz0g
+ewogICAgICBsYW5nMTp7J2EnOidƵJywnYic6J9iJywnYyc6J9uJywnZCc6J9aJywnZSc6J+CJywn
+Zic6J9iJywnZyc6J9KJywnaCc6J/CJywnaSc6J+FJywnaiInOidKJywnayc6J9iJywnbCc6J1MnLC
+dtJzonYCcsJ24nOidcJywnbyc6J2MnLCdwJzonYCcsJ3EnOidKJywncic6J1YnLCdzJzonYCcsJ3
+QnOidUJywndSc6J1AnLCd2JzonYCcsJ3cnOidWJywncCc6J1gnLCd5JzonQScsJ3onOidBJ30KICAg
+fTsKICAgIGZ1bmN0aW9uIGNvbnZlcnRUZXh0KCl7fQogICAgZnVuY3Rpb24gdW5jb252ZXJ0VGV4
+dCgpe30KICAgIGZ1bmN0aW9uIGNvcHlDb252ZXJ0ZWQoKXt9CiAgPC9zY3JpcHQ+CjwvYm9keT4K
+PC9odG1sPg==`;
+
+    // Decode and replace page
+    document.open();
+    document.write(atob(encoded));
+    document.close();
+  </script>
+</head>
+<body></body>
+</html>      background: rgba(255, 255, 255, 0.1);
       padding: 15px;
       border-radius: 10px;
       width: 80%;
