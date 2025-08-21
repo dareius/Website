@@ -30,9 +30,14 @@
       resize: none;
       outline: none;
     }
-    button {
+    .button-group {
+      display: flex;
+      justify-content: center;
       margin-top: 15px;
-      padding: 12px 24px;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 12px 20px;
       font-size: 1rem;
       border: none;
       border-radius: 10px;
@@ -40,7 +45,7 @@
       color: #fff;
       cursor: pointer;
       transition: 0.3s;
-      margin-right: 10px;
+      margin: 5px;
     }
     button:hover {
       background: #ff9800;
@@ -57,19 +62,18 @@
       word-wrap: break-word;
       min-height: 60px;
     }
-    .button-group {
-      display: flex;
-      justify-content: center;
-    }
   </style>
 </head>
 <body>
   <h1>Custom Language Converter</h1>
   <textarea id="inputText" placeholder="Type text here..."></textarea>
+  
   <div class="button-group">
     <button onclick="convertText()">Convert</button>
     <button onclick="unconvertText()">Unconvert</button>
+    <button onclick="copyConverted()">Copy Converted</button>
   </div>
+  
   <div id="output"></div>
 
   <script>
@@ -80,7 +84,7 @@
       'y': 'Ɓ','z': 'Ⱥ'
     };
 
-    // Build reverse map for unconverting
+    // Reverse map for unconverting
     const reverseMapping = {};
     for (let key in mapping) {
       reverseMapping[mapping[key]] = key;
@@ -111,6 +115,19 @@
         }
       }
       document.getElementById("output").innerText = output;
+    }
+
+    function copyConverted() {
+      const text = document.getElementById("output").innerText;
+      if (text.trim() !== "") {
+        navigator.clipboard.writeText(text).then(() => {
+          alert("Converted text copied to clipboard!");
+        }).catch(err => {
+          alert("Failed to copy: " + err);
+        });
+      } else {
+        alert("No text to copy!");
+      }
     }
   </script>
 </body>
