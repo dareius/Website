@@ -3,32 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Color Explorer Shades</title>
+<title>Color Explorer Pro</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", sans-serif; }
   html, body { height: 100%; overflow: hidden; background: #1E293B; color: white; }
 
-  .wrapper {
-    display: flex;
-    width: 200%;
-    height: 100%;
-    transition: transform 0.4s ease;
-  }
+  .wrapper { display: flex; width: 200%; height: 100%; transition: transform 0.4s ease; }
 
   /* MAIN PAGE */
-  .main {
-    width: 50%;
-    display: flex;
-    height: 100%;
-  }
+  .main { width: 50%; display: flex; height: 100%; }
 
   .sidebar {
-    width: 250px;
-    background: #111827;
-    padding: 20px;
-    overflow-y: auto;
-    transition: transform 0.4s;
-    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    width: 250px; background: #111827; padding: 20px; overflow-y: auto;
+    transition: transform 0.4s; box-shadow: 0 0 20px rgba(0,0,0,0.3);
   }
   .sidebar.hidden { transform: translateX(-260px); }
 
@@ -37,60 +24,37 @@
   .color-list { display: flex; flex-direction: column; gap: 8px; }
 
   .color-button {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 8px;
-    background: none;
-    color: white;
-    cursor: pointer;
-    transition: background 0.3s;
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 8px 12px;
+    border: none; border-radius: 8px;
+    background: none; color: white;
+    cursor: pointer; transition: background 0.3s;
   }
   .color-button:hover { background: #1f2937; }
 
   .color-swatch {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
-    flex-shrink: 0;
+    width: 20px; height: 20px; border-radius: 4px; flex-shrink: 0;
   }
 
   .main-display {
-    flex: 1;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    flex: 1; position: relative;
+    display: flex; align-items: center; justify-content: center;
     transition: background 0.4s;
   }
 
   .toggle {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    background: white;
-    color: black;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 10px;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    position: absolute; top: 20px; left: 20px;
+    background: white; color: black; border: none;
+    padding: 8px 14px; border-radius: 10px;
+    cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   }
   .toggle:hover { background: #e5e7eb; }
 
   .info-box {
-    background: rgba(255,255,255,0.8);
-    color: black;
-    border-radius: 16px;
-    padding: 20px;
-    text-align: center;
-    max-width: 300px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    backdrop-filter: blur(6px);
-    animation: pop 0.3s ease;
+    background: rgba(255,255,255,0.8); color: black;
+    border-radius: 16px; padding: 20px; text-align: center;
+    max-width: 300px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    backdrop-filter: blur(6px); animation: pop 0.3s ease;
   }
   @keyframes pop {
     from { transform: scale(0.9); opacity: 0; }
@@ -99,29 +63,15 @@
 
   /* SETTINGS PAGE */
   .settings {
-    width: 50%;
-    background: #0f172a;
-    padding: 40px;
-    overflow-y: auto;
+    width: 50%; background: #0f172a; padding: 40px; overflow-y: auto;
   }
   .settings h1 { text-align: center; margin-bottom: 20px; }
-  .toggle-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 15px 0;
-  }
+  .toggle-row { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; }
 
-  .switch {
-    position: relative;
-    display: inline-block;
-    width: 40px;
-    height: 20px;
-  }
+  .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
   .switch input { opacity: 0; width: 0; height: 0; }
   .slider {
-    position: absolute; cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
     background-color: #555; transition: .4s; border-radius: 20px;
   }
   .slider:before {
@@ -133,7 +83,6 @@
   input:checked + .slider:before { transform: translateX(20px); }
 
   select { width: 100%; padding: 8px; border-radius: 6px; border: none; margin-top: 10px; }
-
   .hint { text-align: center; opacity: 0.6; margin-top: 15px; }
 </style>
 </head>
@@ -158,17 +107,11 @@
     <h1>Settings ⚙️</h1>
     <div class="toggle-row">
       <span>Show All Shades</span>
-      <label class="switch">
-        <input type="checkbox" id="showShades">
-        <span class="slider"></span>
-      </label>
+      <label class="switch"><input type="checkbox" id="showShades"><span class="slider"></span></label>
     </div>
     <div class="toggle-row">
       <span>Anti-Dupe Mode</span>
-      <label class="switch">
-        <input type="checkbox" id="antiDupe">
-        <span class="slider"></span>
-      </label>
+      <label class="switch"><input type="checkbox" id="antiDupe"><span class="slider"></span></label>
     </div>
     <div id="shadeCountContainer" style="display:none; margin-top:20px;">
       <label>Shade Count:</label>
@@ -185,16 +128,11 @@
 
 <script>
 const baseColors = [
-  { name: 'Red', hex: '#FF0000' },
-  { name: 'Orange', hex: '#FFA500' },
-  { name: 'Yellow', hex: '#FFFF00' },
-  { name: 'Green', hex: '#008000' },
-  { name: 'Blue', hex: '#0000FF' },
-  { name: 'Purple', hex: '#800080' },
-  { name: 'Pink', hex: '#FFC0CB' },
-  { name: 'Brown', hex: '#A52A2A' },
-  { name: 'Black', hex: '#000000' },
-  { name: 'White', hex: '#FFFFFF' },
+  { name: 'Red', hex: '#FF0000' }, { name: 'Orange', hex: '#FFA500' },
+  { name: 'Yellow', hex: '#FFFF00' }, { name: 'Green', hex: '#008000' },
+  { name: 'Blue', hex: '#0000FF' }, { name: 'Purple', hex: '#800080' },
+  { name: 'Pink', hex: '#FFC0CB' }, { name: 'Brown', hex: '#A52A2A' },
+  { name: 'Black', hex: '#000000' }, { name: 'White', hex: '#FFFFFF' },
   { name: 'Gray', hex: '#808080' }
 ];
 
@@ -203,10 +141,12 @@ const sidebar = document.getElementById('sidebar');
 const colorList = document.getElementById('colorList');
 const info = document.getElementById('info');
 const showShades = document.getElementById('showShades');
+const antiDupe = document.getElementById('antiDupe');
 const shadeCountContainer = document.getElementById('shadeCountContainer');
 const shadeCount = document.getElementById('shadeCount');
 const menuBtn = document.getElementById('menuBtn');
 let showShadesMode = false;
+let antiDupeMode = false;
 
 menuBtn.onclick = () => {
   sidebar.classList.toggle('hidden');
@@ -218,29 +158,50 @@ showShades.onchange = () => {
   shadeCountContainer.style.display = showShadesMode ? 'block' : 'none';
   renderColors();
 };
+antiDupe.onchange = () => {
+  antiDupeMode = antiDupe.checked;
+  renderColors();
+};
 shadeCount.onchange = renderColors;
 
 function hexToRgb(hex) {
   const bigint = parseInt(hex.slice(1), 16);
-  const r = (bigint >> 16) & 255;
-  const g = (bigint >> 8) & 255;
-  const b = bigint & 255;
-  return [r, g, b];
+  return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
 }
 function rgbToHex(r,g,b) {
   return "#" + ((1 << 24) + (r<<16) + (g<<8) + b).toString(16).slice(1).toUpperCase();
 }
+
 function generateShades(hex, count) {
   const [r,g,b] = hexToRgb(hex);
   const shades = [];
   for(let i=0;i<count;i++){
-    const factor = i / count;
-    const newR = Math.min(255, Math.max(0, r * (1 - factor) + 255 * factor * 0.5));
-    const newG = Math.min(255, Math.max(0, g * (1 - factor) + 255 * factor * 0.5));
-    const newB = Math.min(255, Math.max(0, b * (1 - factor) + 255 * factor * 0.5));
-    shades.push(rgbToHex(Math.round(newR), Math.round(newG), Math.round(newB)));
+    const factor = i / (count - 1);
+    const newR = Math.round(r * (1 - factor) + 255 * factor * 0.4);
+    const newG = Math.round(g * (1 - factor) + 255 * factor * 0.4);
+    const newB = Math.round(b * (1 - factor) + 255 * factor * 0.4);
+    shades.push(rgbToHex(newR, newG, newB));
   }
   return shades;
+}
+
+function colorDistance(rgb1, rgb2) {
+  return Math.sqrt(
+    Math.pow(rgb1[0]-rgb2[0], 2) +
+    Math.pow(rgb1[1]-rgb2[1], 2) +
+    Math.pow(rgb1[2]-rgb2[2], 2)
+  );
+}
+
+function removeDuplicates(colors, threshold = 25) {
+  const filtered = [];
+  colors.forEach(hex => {
+    const rgb = hexToRgb(hex);
+    if (!filtered.some(f => colorDistance(rgb, hexToRgb(f)) < threshold)) {
+      filtered.push(hex);
+    }
+  });
+  return filtered;
 }
 
 function renderColors() {
@@ -248,7 +209,8 @@ function renderColors() {
   const count = parseInt(shadeCount.value);
   if (showShadesMode) {
     baseColors.forEach(c => {
-      const shades = generateShades(c.hex, Math.min(count, 100)); // limit for sanity
+      let shades = generateShades(c.hex, count);
+      if (antiDupeMode) shades = removeDuplicates(shades);
       shades.forEach((shade, i) => {
         const btn = document.createElement('button');
         btn.className = 'color-button';
@@ -272,20 +234,14 @@ renderColors();
 function showColor(name, hex) {
   document.body.style.backgroundColor = hex;
   const [r,g,b] = hexToRgb(hex);
-  info.innerHTML = `
-    <h2>${name}</h2>
-    <p>HEX: ${hex}</p>
-    <p>RGB: rgb(${r}, ${g}, ${b})</p>
-  `;
+  info.innerHTML = `<h2>${name}</h2><p>HEX: ${hex}</p><p>RGB: rgb(${r}, ${g}, ${b})</p>`;
 }
 
-// Swipe Navigation — ignore sidebar drags
-let startX = 0;
-let dragging = false;
+// Swipe Navigation — sidebar safe
+let startX = 0; let dragging = false;
 document.addEventListener('touchstart', e => {
   if (e.target.closest('.sidebar')) return;
-  startX = e.touches[0].clientX;
-  dragging = true;
+  startX = e.touches[0].clientX; dragging = true;
 });
 document.addEventListener('touchend', e => {
   if (!dragging) return;
@@ -295,6 +251,5 @@ document.addEventListener('touchend', e => {
   else if (diff > 80) wrapper.style.transform = 'translateX(0%)';
 });
 </script>
-
 </body>
 </html>
