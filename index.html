@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Color Explorer Pro</title>
+<title>Color Explorer Deluxe</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", sans-serif; }
   html, body { height: 100%; overflow: hidden; background: #1E293B; color: white; }
@@ -25,10 +25,8 @@
 
   .color-button {
     display: flex; align-items: center; gap: 10px;
-    width: 100%; padding: 8px 12px;
-    border: none; border-radius: 8px;
-    background: none; color: white;
-    cursor: pointer; transition: background 0.3s;
+    width: 100%; padding: 8px 12px; border: none; border-radius: 8px;
+    background: none; color: white; cursor: pointer; transition: background 0.3s;
   }
   .color-button:hover { background: #1f2937; }
 
@@ -63,6 +61,203 @@
 
   /* SETTINGS PAGE */
   .settings {
+    width: 50%; background: #0f172a; padding: 40px; overflow-y: auto;
+  }
+  .settings h1 { text-align: center; margin-bottom: 20px; }
+  .toggle-row { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; }
+
+  .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #555; transition: .4s; border-radius: 20px;
+  }
+  .slider:before {
+    position: absolute; content: "";
+    height: 16px; width: 16px; left: 2px; bottom: 2px;
+    background-color: white; transition: .4s; border-radius: 50%;
+  }
+  input:checked + .slider { background-color: #4ade80; }
+  input:checked + .slider:before { transform: translateX(20px); }
+
+  input[type="number"] {
+    width: 100%; padding: 8px; border-radius: 6px;
+    border: none; margin-top: 10px; font-size: 1em;
+  }
+
+  .hint { text-align: center; opacity: 0.6; margin-top: 15px; }
+</style>
+</head>
+<body>
+
+<div class="wrapper" id="wrapper">
+  <!-- MAIN -->
+  <div class="main">
+    <div class="sidebar" id="sidebar">
+      <h1>Main Colors</h1>
+      <div id="colorList" class="color-list"></div>
+    </div>
+    <div class="main-display" id="mainDisplay">
+      <button class="toggle" id="menuBtn">Hide Menu</button>
+      <div id="info" class="info-box">Select a color</div>
+      <div class="hint">← Swipe left for settings</div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="settings">
+    <h1>Settings ⚙️</h1>
+    <div class="toggle-row">
+      <span>Show All Shades</span>
+      <label class="switch"><input type="checkbox" id="showShades"><span class="slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <span>Anti-Dupe Mode</span>
+      <label class="switch"><input type="checkbox" id="antiDupe"><span class="slider"></span></label>
+    </div>
+    <div id="shadeCountContainer" style="display:none; margin-top:20px;">
+      <label>Shade Count:</label>
+      <input type="number" id="shadeCount" min="10" max="100000" value="100" step="10">
+      <small style="opacity:0.6;">(If too high, auto-adjusts to prevent lag)</small>
+    </div>
+    <div class="hint">→ Swipe right to return</div>
+  </div>
+</div>
+
+<script>
+const baseColors = [
+  { name: 'Red', hex: '#FF0000' }, { name: 'Orange', hex: '#FFA500' },
+  { name: 'Yellow', hex: '#FFFF00' }, { name: 'Green', hex: '#008000' },
+  { name: 'Blue', hex: '#0000FF' }, { name: 'Purple', hex: '#800080' },
+  { name: 'Pink', hex: '#FFC0CB' }, { name: 'Brown', hex: '#A52A2A' },
+  { name: 'Black', hex: '#000000' }, { name: 'White', hex: '#FFFFFF' },
+  { name: 'Gray', hex: '#808080' }
+];
+
+const wrapper = document.getElementById('wrapper');
+const sidebar = document.getElementById('sidebar');
+const colorList = document.getElementById('colorList');
+const info = document.getElementById('info');
+const showShades = document.getElementById('showShades');
+const antiDupe = document.getElementById('antiDupe');
+const shadeCountContainer = document.getElementById('shadeCountContainer');
+const shadeCountInput = document.getElementById('shadeCount');
+const menuBtn = document.getElementById('menuBtn');
+let showShadesMode = false;
+let antiDupeMode = false;
+
+menuBtn.onclick = () => {
+  sidebar.classList.toggle('hidden');
+  menuBtn.textContent = sidebar.classList.contains('hidden') ? 'Show Menu' : 'Hide Menu';
+};
+
+showShades.onchange = () => {
+  showShadesMode = showShades.checked;
+  shadeCountContainer.style.display = showShadesMode ? 'block' : 'none';
+  renderColors();
+};
+antiDupe.onchange = () => {
+  antiDupeMode = antiDupe.checked;
+  renderColors();
+};
+shadeCountInput.onchange = renderColors;
+
+function hexToRgb(hex) {
+  const bigint = parseInt(hex.slice(1), 16);
+  return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
+}
+function rgbToHex(r,g,b) {
+  return "#" + ((1 << 24) + (r<<16) + (g<<8) + b).toString(16).slice(1).toUpperCase();
+}
+
+function generateShades(hex, count) {
+  const [r,g,b] = hexToRgb(hex);
+  const shades = [];
+  for(let i=0;i<count;i++){
+    const factor = i / (count - 1);
+    const newR = Math.round(r * (1 - factor) + 255 * factor * 0.5);
+    const newG = Math.round(g * (1 - factor) + 255 * factor * 0.5);
+    const newB = Math.round(b * (1 - factor) + 255 * factor * 0.5);
+    shades.push(rgbToHex(newR, newG, newB));
+  }
+  return shades;
+}
+
+function colorDistance(rgb1, rgb2) {
+  return Math.sqrt(
+    Math.pow(rgb1[0]-rgb2[0], 2) +
+    Math.pow(rgb1[1]-rgb2[1], 2) +
+    Math.pow(rgb1[2]-rgb2[2], 2)
+  );
+}
+
+function removeDuplicates(colors, threshold = 10) {
+  const filtered = [];
+  colors.forEach(hex => {
+    const rgb = hexToRgb(hex);
+    if (!filtered.some(f => colorDistance(rgb, hexToRgb(f)) < threshold)) {
+      filtered.push(hex);
+    }
+  });
+  return filtered;
+}
+
+function renderColors() {
+  colorList.innerHTML = "";
+  let count = parseInt(shadeCountInput.value);
+  if (isNaN(count) || count <= 0) count = 100;
+  if (count > 10000) {
+    alert("Shade count too high! Automatically limiting to 10,000 to prevent lag.");
+    count = 10000;
+    shadeCountInput.value = 10000;
+  }
+
+  if (showShadesMode) {
+    baseColors.forEach(c => {
+      let shades = generateShades(c.hex, count);
+      if (antiDupeMode) shades = removeDuplicates(shades, 5);
+      shades.forEach((shade, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'color-button';
+        btn.innerHTML = `<div class='color-swatch' style='background:${shade}'></div><span>${c.name} ${i+1}</span>`;
+        btn.onclick = () => showColor(c.name, shade);
+        colorList.appendChild(btn);
+      });
+    });
+  } else {
+    baseColors.forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'color-button';
+      btn.innerHTML = `<div class='color-swatch' style='background:${c.hex}'></div><span>${c.name}</span>`;
+      btn.onclick = () => showColor(c.name, c.hex);
+      colorList.appendChild(btn);
+    });
+  }
+}
+renderColors();
+
+function showColor(name, hex) {
+  document.body.style.backgroundColor = hex;
+  const [r,g,b] = hexToRgb(hex);
+  info.innerHTML = `<h2>${name}</h2><p>HEX: ${hex}</p><p>RGB: rgb(${r}, ${g}, ${b})</p>`;
+}
+
+// Swipe Navigation — sidebar safe
+let startX = 0; let dragging = false;
+document.addEventListener('touchstart', e => {
+  if (e.target.closest('.sidebar')) return;
+  startX = e.touches[0].clientX; dragging = true;
+});
+document.addEventListener('touchend', e => {
+  if (!dragging) return;
+  const diff = e.changedTouches[0].clientX - startX;
+  dragging = false;
+  if (diff < -80) wrapper.style.transform = 'translateX(-50%)';
+  else if (diff > 80) wrapper.style.transform = 'translateX(0%)';
+});
+</script>
+</body>
+</html>  .settings {
     width: 50%; background: #0f172a; padding: 40px; overflow-y: auto;
   }
   .settings h1 { text-align: center; margin-bottom: 20px; }
