@@ -3,72 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Color Explorer</title>
+<title>Color Explorer+</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", sans-serif; }
-  body, html { height: 100%; }
-  body { display: flex; background-color: #1E293B; color: white; transition: background 0.5s; }
+  body, html { height: 100%; overflow: hidden; background: #111827; color: white; }
 
-  .sidebar {
-    width: 250px;
-    background: #111827;
-    padding: 20px;
+  .container {
+    display: flex;
+    height: 100%;
+    width: 200%;
+    transition: transform 0.5s ease;
+  }
+  .page {
+    width: 50%;
+    flex-shrink: 0;
+    height: 100%;
     overflow-y: auto;
-    transition: transform 0.4s;
-    box-shadow: 0 0 20px rgba(0,0,0,0.3);
-  }
-  .sidebar.hidden { transform: translateX(-260px); }
-
-  .sidebar h1 {
-    text-align: center;
-    font-size: 1.5em;
-    margin-bottom: 15px;
-  }
-
-  .color-button {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 8px;
-    background: none;
-    color: white;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-  .color-button:hover { background: #1f2937; }
-
-  .color-swatch {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
-  }
-
-  .main {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
     transition: background 0.4s;
   }
+  .page.main { background: #1E293B; display: flex; flex-direction: column; }
+  .page.settings { background: #0f172a; padding: 30px; }
 
-  .toggle {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    background: white;
-    color: black;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 10px;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    transition: background 0.3s;
+  .header {
+    text-align: center;
+    font-size: 1.5em;
+    margin: 15px;
   }
-  .toggle:hover { background: #e5e7eb; }
+
+  .color-list {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding: 10px;
+    scroll-snap-type: x mandatory;
+  }
+  .color-item {
+    flex: 0 0 auto;
+    width: 100px;
+    height: 100px;
+    border-radius: 12px;
+    cursor: pointer;
+    scroll-snap-align: start;
+    transition: transform 0.2s;
+  }
+  .color-item:hover { transform: scale(1.05); }
 
   .info-box {
     background: rgba(255,255,255,0.8);
@@ -76,31 +54,81 @@
     border-radius: 16px;
     padding: 20px;
     text-align: center;
+    margin: 20px auto;
     max-width: 300px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     backdrop-filter: blur(6px);
-    animation: pop 0.3s ease;
   }
 
-  @keyframes pop {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+  .toggle-container { margin-bottom: 20px; }
+  .toggle-label { display: flex; align-items: center; justify-content: space-between; margin: 10px 0; }
+  .toggle-label span { font-size: 1.2em; }
+  .toggle-input { width: 40px; height: 20px; position: relative; cursor: pointer; }
+  .toggle-input input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    background: #555; border-radius: 20px; transition: 0.4s;
   }
+  .slider:before {
+    content: ''; position: absolute; height: 16px; width: 16px; left: 2px; bottom: 2px;
+    background: white; border-radius: 50%; transition: 0.4s;
+  }
+  input:checked + .slider { background: #4ade80; }
+  input:checked + .slider:before { transform: translateX(20px); }
 
-  .info-box h2 { margin-bottom: 10px; font-size: 1.8em; }
-  .info-box p { font-family: monospace; margin: 4px 0; }
+  select { width: 100%; padding: 8px; border-radius: 8px; border: none; margin-top: 10px; }
+
+  .swipe-hint {
+    text-align: center;
+    opacity: 0.6;
+    margin-top: 15px;
+  }
 </style>
 </head>
 <body>
 
-<div class="sidebar" id="sidebar">
-  <h1>Main Colors</h1>
-  <div id="colorList"></div>
-</div>
+<div class="container" id="container">
+  <!-- MAIN PAGE -->
+  <div class="page main" id="mainPage">
+    <h1 class="header">Color Explorer+</h1>
+    <div class="color-list" id="colorList"></div>
+    <div id="infoBox" class="info-box">Select a color</div>
+    <p class="swipe-hint">← Slide left for Settings</p>
+  </div>
 
-<div class="main" id="main">
-  <button class="toggle" id="toggleBtn">Hide Menu</button>
-  <div id="info"></div>
+  <!-- SETTINGS PAGE -->
+  <div class="page settings" id="settingsPage">
+    <h1 class="header">Settings ⚙️</h1>
+
+    <div class="toggle-container">
+      <div class="toggle-label">
+        <span>Show All Shades</span>
+        <label class="toggle-input">
+          <input type="checkbox" id="toggleShades">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-label">
+        <span>Anti-Dupe Mode</span>
+        <label class="toggle-input">
+          <input type="checkbox" id="toggleAntiDupe">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div id="shadeCountContainer" style="display:none;">
+        <label>Shade Count:</label>
+        <select id="shadeCount">
+          <option>100</option>
+          <option>1000</option>
+          <option>10000</option>
+          <option>100000</option>
+        </select>
+      </div>
+    </div>
+    <p class="swipe-hint">→ Slide right to return</p>
+  </div>
 </div>
 
 <script>
@@ -118,18 +146,24 @@ const colors = [
   { name: 'Gray', hex: '#808080' }
 ];
 
-const sidebar = document.getElementById('sidebar');
-const main = document.getElementById('main');
-const info = document.getElementById('info');
-const toggleBtn = document.getElementById('toggleBtn');
+const container = document.getElementById('container');
 const colorList = document.getElementById('colorList');
+const infoBox = document.getElementById('infoBox');
+const toggleShades = document.getElementById('toggleShades');
+const shadeCountContainer = document.getElementById('shadeCountContainer');
 
-colors.forEach(c => {
-  const btn = document.createElement('button');
-  btn.className = 'color-button';
-  btn.innerHTML = `<div class="color-swatch" style="background:${c.hex}"></div><span>${c.name}</span>`;
-  btn.onclick = () => showColorInfo(c);
-  colorList.appendChild(btn);
+toggleShades.addEventListener('change', () => {
+  shadeCountContainer.style.display = toggleShades.checked ? 'block' : 'none';
+});
+
+let startX = 0;
+let currentTranslate = 0;
+
+document.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+document.addEventListener('touchend', e => {
+  const diff = e.changedTouches[0].clientX - startX;
+  if (diff < -80) container.style.transform = 'translateX(-50%)';
+  else if (diff > 80) container.style.transform = 'translateX(0%)';
 });
 
 function hexToRgb(hex) {
@@ -148,10 +182,8 @@ function hexToHsl(hex) {
   r /= 255; g /= 255; b /= 255;
   const max = Math.max(r, g, b), min = Math.min(r, g, b);
   let h, s, l = (max + min) / 2;
-
-  if (max === min) {
-    h = s = 0;
-  } else {
+  if (max === min) { h = s = 0; }
+  else {
     const d = max - min;
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
     switch (max) {
@@ -164,22 +196,23 @@ function hexToHsl(hex) {
   return `hsl(${Math.round(h)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
 }
 
-function showColorInfo(color) {
-  document.body.style.backgroundColor = color.hex;
-  info.innerHTML = `
-    <div class='info-box'>
-      <h2>${color.name}</h2>
-      <p>HEX: ${color.hex}</p>
-      <p>RGB: ${hexToRgb(color.hex)}</p>
-      <p>HSL: ${hexToHsl(color.hex)}</p>
-    </div>
+colors.forEach(c => {
+  const div = document.createElement('div');
+  div.className = 'color-item';
+  div.style.background = c.hex;
+  div.title = c.name;
+  div.onclick = () => showColor(c);
+  colorList.appendChild(div);
+});
+
+function showColor(color) {
+  infoBox.innerHTML = `
+    <h2>${color.name}</h2>
+    <p>HEX: ${color.hex}</p>
+    <p>RGB: ${hexToRgb(color.hex)}</p>
+    <p>HSL: ${hexToHsl(color.hex)}</p>
   `;
 }
-
-toggleBtn.onclick = () => {
-  sidebar.classList.toggle('hidden');
-  toggleBtn.textContent = sidebar.classList.contains('hidden') ? 'Show Menu' : 'Hide Menu';
-};
 </script>
 
 </body>
