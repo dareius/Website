@@ -1,42 +1,186 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8"/>
-<title>Discord message mockup (SAMPLE)</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color Explorer</title>
 <style>
-  body { background:#2f3136; font-family: "Arial", sans-serif; padding:40px; }
-  .msg { display:flex; gap:12px; align-items:flex-start; color:#dcddde; width:760px; }
-  .avatar {
-    width:40px; height:40px; border-radius:6px;
-    background: url('https://i.imgur.com/placeholder.png') center/cover no-repeat;
-    filter: drop-shadow(0 0 6px rgba(0,0,0,0.5));
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", sans-serif; }
+  body, html { height: 100%; }
+  body { display: flex; background-color: #1E293B; color: white; transition: background 0.5s; }
+
+  .sidebar {
+    width: 250px;
+    background: #111827;
+    padding: 20px;
+    overflow-y: auto;
+    transition: transform 0.4s;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
   }
-  .content { flex:1; }
-  .header { display:flex; gap:8px; align-items:center; }
-  .username { color:#ffffff; font-weight:600; font-size:14px; }
-  .timestamp { color:#6b6d70; font-size:12px; margin-left:6px; }
-  .text { margin-top:2px; font-size:16px; color:#dcddde; line-height:1.2; }
-  .watermark {
-    margin-top:10px; font-size:12px; color:#ff9b9b; font-weight:700;
-    letter-spacing:0.6px;
+  .sidebar.hidden { transform: translateX(-260px); }
+
+  .sidebar h1 {
+    text-align: center;
+    font-size: 1.5em;
+    margin-bottom: 15px;
   }
-  /* dark background for the message area (like Discord) */
-  .bubble { background:transparent; padding:6px 0; }
+
+  .color-button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .color-button:hover { background: #1f2937; }
+
+  .color-swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+  }
+
+  .main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: background 0.4s;
+  }
+
+  .toggle {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: white;
+    color: black;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    transition: background 0.3s;
+  }
+  .toggle:hover { background: #e5e7eb; }
+
+  .info-box {
+    background: rgba(255,255,255,0.8);
+    color: black;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    max-width: 300px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    backdrop-filter: blur(6px);
+    animation: pop 0.3s ease;
+  }
+
+  @keyframes pop {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .info-box h2 { margin-bottom: 10px; font-size: 1.8em; }
+  .info-box p { font-family: monospace; margin: 4px 0; }
 </style>
 </head>
 <body>
-  <div class="msg">
-    <div class="avatar" aria-hidden="true"></div>
-    <div class="content">
-      <div class="header">
-        <div class="username">vibez</div>
-        <div class="timestamp">Yesterday at 9:I miss you PM</div>
-      </div>
-      <div class="bubble">
-        <div class="text">ill give it back just please dont report me</div>
-      </div>
-      <div class="watermark">SAMPLE — NOT REAL</div>
+
+<div class="sidebar" id="sidebar">
+  <h1>Main Colors</h1>
+  <div id="colorList"></div>
+</div>
+
+<div class="main" id="main">
+  <button class="toggle" id="toggleBtn">Hide Menu</button>
+  <div id="info"></div>
+</div>
+
+<script>
+const colors = [
+  { name: 'Red', hex: '#FF0000' },
+  { name: 'Orange', hex: '#FFA500' },
+  { name: 'Yellow', hex: '#FFFF00' },
+  { name: 'Green', hex: '#008000' },
+  { name: 'Blue', hex: '#0000FF' },
+  { name: 'Purple', hex: '#800080' },
+  { name: 'Pink', hex: '#FFC0CB' },
+  { name: 'Brown', hex: '#A52A2A' },
+  { name: 'Black', hex: '#000000' },
+  { name: 'White', hex: '#FFFFFF' },
+  { name: 'Gray', hex: '#808080' }
+];
+
+const sidebar = document.getElementById('sidebar');
+const main = document.getElementById('main');
+const info = document.getElementById('info');
+const toggleBtn = document.getElementById('toggleBtn');
+const colorList = document.getElementById('colorList');
+
+colors.forEach(c => {
+  const btn = document.createElement('button');
+  btn.className = 'color-button';
+  btn.innerHTML = `<div class="color-swatch" style="background:${c.hex}"></div><span>${c.name}</span>`;
+  btn.onclick = () => showColorInfo(c);
+  colorList.appendChild(btn);
+});
+
+function hexToRgb(hex) {
+  const bigint = parseInt(hex.slice(1), 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+function hexToHsl(hex) {
+  const bigint = parseInt(hex.slice(1), 16);
+  let r = (bigint >> 16) & 255;
+  let g = (bigint >> 8) & 255;
+  let b = bigint & 255;
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h, s, l = (max + min) / 2;
+
+  if (max === min) {
+    h = s = 0;
+  } else {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h *= 60;
+  }
+  return `hsl(${Math.round(h)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
+}
+
+function showColorInfo(color) {
+  document.body.style.backgroundColor = color.hex;
+  info.innerHTML = `
+    <div class='info-box'>
+      <h2>${color.name}</h2>
+      <p>HEX: ${color.hex}</p>
+      <p>RGB: ${hexToRgb(color.hex)}</p>
+      <p>HSL: ${hexToHsl(color.hex)}</p>
     </div>
-  </div>
+  `;
+}
+
+toggleBtn.onclick = () => {
+  sidebar.classList.toggle('hidden');
+  toggleBtn.textContent = sidebar.classList.contains('hidden') ? 'Show Menu' : 'Hide Menu';
+};
+</script>
+
 </body>
 </html>
