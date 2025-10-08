@@ -3,50 +3,93 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Color Explorer+</title>
+<title>Color Explorer (Advanced)</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", sans-serif; }
-  body, html { height: 100%; overflow: hidden; background: #111827; color: white; }
+  html, body { height: 100%; overflow: hidden; }
 
-  .container {
+  body { background: #1E293B; color: white; transition: background 0.4s; }
+
+  .wrapper {
+    display: flex;
+    width: 200%;
+    height: 100%;
+    transition: transform 0.4s ease;
+  }
+
+  /* === MAIN PAGE === */
+  .main {
+    width: 50%;
     display: flex;
     height: 100%;
-    width: 200%;
-    transition: transform 0.5s ease;
   }
-  .page {
-    width: 50%;
-    flex-shrink: 0;
-    height: 100%;
-    overflow-y: auto;
-    transition: background 0.4s;
-  }
-  .page.main { background: #1E293B; display: flex; flex-direction: column; }
-  .page.settings { background: #0f172a; padding: 30px; }
 
-  .header {
+  .sidebar {
+    width: 250px;
+    background: #111827;
+    padding: 20px;
+    overflow-y: auto;
+    transition: transform 0.4s;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  }
+  .sidebar.hidden { transform: translateX(-260px); }
+
+  .sidebar h1 {
     text-align: center;
     font-size: 1.5em;
-    margin: 15px;
+    margin-bottom: 15px;
   }
 
   .color-list {
     display: flex;
-    overflow-x: auto;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .color-button {
+    display: flex;
+    align-items: center;
     gap: 10px;
-    padding: 10px;
-    scroll-snap-type: x mandatory;
-  }
-  .color-item {
-    flex: 0 0 auto;
-    width: 100px;
-    height: 100px;
-    border-radius: 12px;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: white;
     cursor: pointer;
-    scroll-snap-align: start;
-    transition: transform 0.2s;
+    transition: background 0.3s;
   }
-  .color-item:hover { transform: scale(1.05); }
+  .color-button:hover { background: #1f2937; }
+
+  .color-swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+  }
+
+  .main-display {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.4s;
+  }
+
+  .toggle {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: white;
+    color: black;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    transition: background 0.3s;
+  }
+  .toggle:hover { background: #e5e7eb; }
 
   .info-box {
     background: rgba(255,255,255,0.8);
@@ -54,81 +97,116 @@
     border-radius: 16px;
     padding: 20px;
     text-align: center;
-    margin: 20px auto;
     max-width: 300px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     backdrop-filter: blur(6px);
+    animation: pop 0.3s ease;
   }
 
-  .toggle-container { margin-bottom: 20px; }
-  .toggle-label { display: flex; align-items: center; justify-content: space-between; margin: 10px 0; }
-  .toggle-label span { font-size: 1.2em; }
-  .toggle-input { width: 40px; height: 20px; position: relative; cursor: pointer; }
-  .toggle-input input { opacity: 0; width: 0; height: 0; }
+  @keyframes pop {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* === SETTINGS PAGE === */
+  .settings {
+    width: 50%;
+    background: #0f172a;
+    padding: 40px;
+    overflow-y: auto;
+  }
+  .settings h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 15px 0;
+  }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
   .slider {
-    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-    background: #555; border-radius: 20px; transition: 0.4s;
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #555;
+    transition: .4s;
+    border-radius: 20px;
   }
   .slider:before {
-    content: ''; position: absolute; height: 16px; width: 16px; left: 2px; bottom: 2px;
-    background: white; border-radius: 50%; transition: 0.4s;
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
   }
-  input:checked + .slider { background: #4ade80; }
+  input:checked + .slider { background-color: #4ade80; }
   input:checked + .slider:before { transform: translateX(20px); }
 
-  select { width: 100%; padding: 8px; border-radius: 8px; border: none; margin-top: 10px; }
+  select { width: 100%; padding: 8px; border-radius: 6px; border: none; margin-top: 10px; }
 
-  .swipe-hint {
-    text-align: center;
-    opacity: 0.6;
-    margin-top: 15px;
-  }
+  .hint { text-align: center; opacity: 0.6; margin-top: 15px; }
 </style>
 </head>
 <body>
 
-<div class="container" id="container">
-  <!-- MAIN PAGE -->
-  <div class="page main" id="mainPage">
-    <h1 class="header">Color Explorer+</h1>
-    <div class="color-list" id="colorList"></div>
-    <div id="infoBox" class="info-box">Select a color</div>
-    <p class="swipe-hint">← Slide left for Settings</p>
-  </div>
+<div class="wrapper" id="wrapper">
 
-  <!-- SETTINGS PAGE -->
-  <div class="page settings" id="settingsPage">
-    <h1 class="header">Settings ⚙️</h1>
-
-    <div class="toggle-container">
-      <div class="toggle-label">
-        <span>Show All Shades</span>
-        <label class="toggle-input">
-          <input type="checkbox" id="toggleShades">
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="toggle-label">
-        <span>Anti-Dupe Mode</span>
-        <label class="toggle-input">
-          <input type="checkbox" id="toggleAntiDupe">
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div id="shadeCountContainer" style="display:none;">
-        <label>Shade Count:</label>
-        <select id="shadeCount">
-          <option>100</option>
-          <option>1000</option>
-          <option>10000</option>
-          <option>100000</option>
-        </select>
-      </div>
+  <!-- === MAIN PAGE === -->
+  <div class="main">
+    <div class="sidebar" id="sidebar">
+      <h1>Main Colors</h1>
+      <div id="colorList" class="color-list"></div>
     </div>
-    <p class="swipe-hint">→ Slide right to return</p>
+
+    <div class="main-display" id="mainDisplay">
+      <button class="toggle" id="menuBtn">Hide Menu</button>
+      <div id="info" class="info-box">Select a color</div>
+      <div class="hint">← Swipe left for settings</div>
+    </div>
   </div>
+
+  <!-- === SETTINGS PAGE === -->
+  <div class="settings">
+    <h1>Settings ⚙️</h1>
+    <div class="toggle-row">
+      <span>Show All Shades</span>
+      <label class="switch">
+        <input type="checkbox" id="showShades">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="toggle-row">
+      <span>Anti-Dupe Mode</span>
+      <label class="switch">
+        <input type="checkbox" id="antiDupe">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div id="shadeCountContainer" style="display:none; margin-top:20px;">
+      <label>Shade Count:</label>
+      <select id="shadeCount">
+        <option>100</option>
+        <option>1000</option>
+        <option>10000</option>
+        <option>100000</option>
+      </select>
+    </div>
+    <div class="hint">→ Swipe right to return</div>
+  </div>
+
 </div>
 
 <script>
@@ -146,24 +224,31 @@ const colors = [
   { name: 'Gray', hex: '#808080' }
 ];
 
-const container = document.getElementById('container');
+const wrapper = document.getElementById('wrapper');
+const sidebar = document.getElementById('sidebar');
 const colorList = document.getElementById('colorList');
-const infoBox = document.getElementById('infoBox');
-const toggleShades = document.getElementById('toggleShades');
+const info = document.getElementById('info');
+const mainDisplay = document.getElementById('mainDisplay');
+const menuBtn = document.getElementById('menuBtn');
+const showShades = document.getElementById('showShades');
 const shadeCountContainer = document.getElementById('shadeCountContainer');
 
-toggleShades.addEventListener('change', () => {
-  shadeCountContainer.style.display = toggleShades.checked ? 'block' : 'none';
-});
+menuBtn.onclick = () => {
+  sidebar.classList.toggle('hidden');
+  menuBtn.textContent = sidebar.classList.contains('hidden') ? 'Show Menu' : 'Hide Menu';
+};
 
-let startX = 0;
-let currentTranslate = 0;
+showShades.onchange = () => {
+  shadeCountContainer.style.display = showShades.checked ? 'block' : 'none';
+};
 
-document.addEventListener('touchstart', e => startX = e.touches[0].clientX);
-document.addEventListener('touchend', e => {
-  const diff = e.changedTouches[0].clientX - startX;
-  if (diff < -80) container.style.transform = 'translateX(-50%)';
-  else if (diff > 80) container.style.transform = 'translateX(0%)';
+// Populate color list
+colors.forEach(c => {
+  const btn = document.createElement('button');
+  btn.className = 'color-button';
+  btn.innerHTML = `<div class='color-swatch' style='background:${c.hex}'></div><span>${c.name}</span>`;
+  btn.onclick = () => showColor(c);
+  colorList.appendChild(btn);
 });
 
 function hexToRgb(hex) {
@@ -196,23 +281,31 @@ function hexToHsl(hex) {
   return `hsl(${Math.round(h)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
 }
 
-colors.forEach(c => {
-  const div = document.createElement('div');
-  div.className = 'color-item';
-  div.style.background = c.hex;
-  div.title = c.name;
-  div.onclick = () => showColor(c);
-  colorList.appendChild(div);
-});
-
 function showColor(color) {
-  infoBox.innerHTML = `
+  document.body.style.backgroundColor = color.hex;
+  info.innerHTML = `
     <h2>${color.name}</h2>
     <p>HEX: ${color.hex}</p>
     <p>RGB: ${hexToRgb(color.hex)}</p>
     <p>HSL: ${hexToHsl(color.hex)}</p>
   `;
 }
+
+// Gesture control: ignore drags on sidebar
+let startX = 0;
+let dragging = false;
+document.addEventListener('touchstart', e => {
+  if (e.target.closest('.sidebar')) return; // don’t trigger on sidebar
+  startX = e.touches[0].clientX;
+  dragging = true;
+});
+document.addEventListener('touchend', e => {
+  if (!dragging) return;
+  const diff = e.changedTouches[0].clientX - startX;
+  dragging = false;
+  if (diff < -80) wrapper.style.transform = 'translateX(-50%)';
+  else if (diff > 80) wrapper.style.transform = 'translateX(0%)';
+});
 </script>
 
 </body>
