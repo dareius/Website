@@ -3,12 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Color Explorer (Advanced)</title>
+<title>Color Explorer Shades</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", sans-serif; }
-  html, body { height: 100%; overflow: hidden; }
-
-  body { background: #1E293B; color: white; transition: background 0.4s; }
+  html, body { height: 100%; overflow: hidden; background: #1E293B; color: white; }
 
   .wrapper {
     display: flex;
@@ -17,7 +15,7 @@
     transition: transform 0.4s ease;
   }
 
-  /* === MAIN PAGE === */
+  /* MAIN PAGE */
   .main {
     width: 50%;
     display: flex;
@@ -34,17 +32,9 @@
   }
   .sidebar.hidden { transform: translateX(-260px); }
 
-  .sidebar h1 {
-    text-align: center;
-    font-size: 1.5em;
-    margin-bottom: 15px;
-  }
+  .sidebar h1 { text-align: center; font-size: 1.5em; margin-bottom: 15px; }
 
-  .color-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
+  .color-list { display: flex; flex-direction: column; gap: 8px; }
 
   .color-button {
     display: flex;
@@ -65,6 +55,7 @@
     width: 20px;
     height: 20px;
     border-radius: 4px;
+    flex-shrink: 0;
   }
 
   .main-display {
@@ -87,7 +78,6 @@
     border-radius: 10px;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    transition: background 0.3s;
   }
   .toggle:hover { background: #e5e7eb; }
 
@@ -102,23 +92,19 @@
     backdrop-filter: blur(6px);
     animation: pop 0.3s ease;
   }
-
   @keyframes pop {
     from { transform: scale(0.9); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
   }
 
-  /* === SETTINGS PAGE === */
+  /* SETTINGS PAGE */
   .settings {
     width: 50%;
     background: #0f172a;
     padding: 40px;
     overflow-y: auto;
   }
-  .settings h1 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
+  .settings h1 { text-align: center; margin-bottom: 20px; }
   .toggle-row {
     display: flex;
     justify-content: space-between;
@@ -134,23 +120,14 @@
   }
   .switch input { opacity: 0; width: 0; height: 0; }
   .slider {
-    position: absolute;
-    cursor: pointer;
+    position: absolute; cursor: pointer;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #555;
-    transition: .4s;
-    border-radius: 20px;
+    background-color: #555; transition: .4s; border-radius: 20px;
   }
   .slider:before {
-    position: absolute;
-    content: "";
-    height: 16px;
-    width: 16px;
-    left: 2px;
-    bottom: 2px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
+    position: absolute; content: "";
+    height: 16px; width: 16px; left: 2px; bottom: 2px;
+    background-color: white; transition: .4s; border-radius: 50%;
   }
   input:checked + .slider { background-color: #4ade80; }
   input:checked + .slider:before { transform: translateX(20px); }
@@ -163,14 +140,12 @@
 <body>
 
 <div class="wrapper" id="wrapper">
-
-  <!-- === MAIN PAGE === -->
+  <!-- MAIN -->
   <div class="main">
     <div class="sidebar" id="sidebar">
       <h1>Main Colors</h1>
       <div id="colorList" class="color-list"></div>
     </div>
-
     <div class="main-display" id="mainDisplay">
       <button class="toggle" id="menuBtn">Hide Menu</button>
       <div id="info" class="info-box">Select a color</div>
@@ -178,7 +153,7 @@
     </div>
   </div>
 
-  <!-- === SETTINGS PAGE === -->
+  <!-- SETTINGS -->
   <div class="settings">
     <h1>Settings ⚙️</h1>
     <div class="toggle-row">
@@ -206,11 +181,10 @@
     </div>
     <div class="hint">→ Swipe right to return</div>
   </div>
-
 </div>
 
 <script>
-const colors = [
+const baseColors = [
   { name: 'Red', hex: '#FF0000' },
   { name: 'Orange', hex: '#FFA500' },
   { name: 'Yellow', hex: '#FFFF00' },
@@ -228,10 +202,11 @@ const wrapper = document.getElementById('wrapper');
 const sidebar = document.getElementById('sidebar');
 const colorList = document.getElementById('colorList');
 const info = document.getElementById('info');
-const mainDisplay = document.getElementById('mainDisplay');
-const menuBtn = document.getElementById('menuBtn');
 const showShades = document.getElementById('showShades');
 const shadeCountContainer = document.getElementById('shadeCountContainer');
+const shadeCount = document.getElementById('shadeCount');
+const menuBtn = document.getElementById('menuBtn');
+let showShadesMode = false;
 
 menuBtn.onclick = () => {
   sidebar.classList.toggle('hidden');
@@ -239,63 +214,76 @@ menuBtn.onclick = () => {
 };
 
 showShades.onchange = () => {
-  shadeCountContainer.style.display = showShades.checked ? 'block' : 'none';
+  showShadesMode = showShades.checked;
+  shadeCountContainer.style.display = showShadesMode ? 'block' : 'none';
+  renderColors();
 };
-
-// Populate color list
-colors.forEach(c => {
-  const btn = document.createElement('button');
-  btn.className = 'color-button';
-  btn.innerHTML = `<div class='color-swatch' style='background:${c.hex}'></div><span>${c.name}</span>`;
-  btn.onclick = () => showColor(c);
-  colorList.appendChild(btn);
-});
+shadeCount.onchange = renderColors;
 
 function hexToRgb(hex) {
   const bigint = parseInt(hex.slice(1), 16);
   const r = (bigint >> 16) & 255;
   const g = (bigint >> 8) & 255;
   const b = bigint & 255;
-  return `rgb(${r}, ${g}, ${b})`;
+  return [r, g, b];
 }
-
-function hexToHsl(hex) {
-  const bigint = parseInt(hex.slice(1), 16);
-  let r = (bigint >> 16) & 255;
-  let g = (bigint >> 8) & 255;
-  let b = bigint & 255;
-  r /= 255; g /= 255; b /= 255;
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  let h, s, l = (max + min) / 2;
-  if (max === min) { h = s = 0; }
-  else {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-      case g: h = (b - r) / d + 2; break;
-      case b: h = (r - g) / d + 4; break;
-    }
-    h *= 60;
+function rgbToHex(r,g,b) {
+  return "#" + ((1 << 24) + (r<<16) + (g<<8) + b).toString(16).slice(1).toUpperCase();
+}
+function generateShades(hex, count) {
+  const [r,g,b] = hexToRgb(hex);
+  const shades = [];
+  for(let i=0;i<count;i++){
+    const factor = i / count;
+    const newR = Math.min(255, Math.max(0, r * (1 - factor) + 255 * factor * 0.5));
+    const newG = Math.min(255, Math.max(0, g * (1 - factor) + 255 * factor * 0.5));
+    const newB = Math.min(255, Math.max(0, b * (1 - factor) + 255 * factor * 0.5));
+    shades.push(rgbToHex(Math.round(newR), Math.round(newG), Math.round(newB)));
   }
-  return `hsl(${Math.round(h)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
+  return shades;
 }
 
-function showColor(color) {
-  document.body.style.backgroundColor = color.hex;
+function renderColors() {
+  colorList.innerHTML = "";
+  const count = parseInt(shadeCount.value);
+  if (showShadesMode) {
+    baseColors.forEach(c => {
+      const shades = generateShades(c.hex, Math.min(count, 100)); // limit for sanity
+      shades.forEach((shade, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'color-button';
+        btn.innerHTML = `<div class='color-swatch' style='background:${shade}'></div><span>${c.name} ${i+1}</span>`;
+        btn.onclick = () => showColor(c.name, shade);
+        colorList.appendChild(btn);
+      });
+    });
+  } else {
+    baseColors.forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'color-button';
+      btn.innerHTML = `<div class='color-swatch' style='background:${c.hex}'></div><span>${c.name}</span>`;
+      btn.onclick = () => showColor(c.name, c.hex);
+      colorList.appendChild(btn);
+    });
+  }
+}
+renderColors();
+
+function showColor(name, hex) {
+  document.body.style.backgroundColor = hex;
+  const [r,g,b] = hexToRgb(hex);
   info.innerHTML = `
-    <h2>${color.name}</h2>
-    <p>HEX: ${color.hex}</p>
-    <p>RGB: ${hexToRgb(color.hex)}</p>
-    <p>HSL: ${hexToHsl(color.hex)}</p>
+    <h2>${name}</h2>
+    <p>HEX: ${hex}</p>
+    <p>RGB: rgb(${r}, ${g}, ${b})</p>
   `;
 }
 
-// Gesture control: ignore drags on sidebar
+// Swipe Navigation — ignore sidebar drags
 let startX = 0;
 let dragging = false;
 document.addEventListener('touchstart', e => {
-  if (e.target.closest('.sidebar')) return; // don’t trigger on sidebar
+  if (e.target.closest('.sidebar')) return;
   startX = e.touches[0].clientX;
   dragging = true;
 });
