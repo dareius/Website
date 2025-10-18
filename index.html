@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Speak It! Ultra Edition</title>
+  <title>Speak It! Multilingual Edition</title>
   <style>
     body {
       font-family: system-ui, sans-serif;
-      background: linear-gradient(135deg, #7f00ff, #e100ff);
+      background: linear-gradient(135deg, #007cf0, #00dfd8);
       color: white;
       display: flex;
       flex-direction: column;
@@ -18,9 +18,9 @@
     }
 
     h1 {
-      font-size: 2.2em;
+      font-size: 2em;
       margin-bottom: 10px;
-      text-shadow: 0 0 10px rgba(0,0,0,0.4);
+      text-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
 
     textarea {
@@ -39,7 +39,7 @@
       margin-top: 10px;
       padding: 10px 20px;
       background: white;
-      color: #7f00ff;
+      color: #007cf0;
       border: none;
       border-radius: 8px;
       font-weight: bold;
@@ -48,7 +48,7 @@
     }
 
     button:hover {
-      background: #e0b3ff;
+      background: #b3e5fc;
     }
 
     .controls {
@@ -60,7 +60,7 @@
       max-width: 600px;
     }
 
-    .slider {
+    .slider, .dropdown {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -71,11 +71,6 @@
       font-weight: bold;
     }
 
-    input[type=range] {
-      flex: 1;
-      margin: 0 10px;
-    }
-
     select {
       width: 100%;
       padding: 8px;
@@ -84,35 +79,41 @@
       font-size: 1em;
       outline: none;
     }
+
+    .output {
+      margin-top: 15px;
+      font-size: 1.1em;
+      color: #e0f7fa;
+    }
   </style>
 </head>
 <body>
-  <h1>🧠 Speak It! Ultra Edition</h1>
+  <h1>🌍 Speak It! Multilingual Edition</h1>
   <textarea id="textInput" placeholder="Type something for me to say..."></textarea>
 
   <div class="controls">
-    <div class="slider">
+    <div class="dropdown">
+      <label>Target Language</label>
+      <select id="langSelect">
+        <option value="en">English</option>
+        <option value="es">Spanish</option>
+        <option value="fr">French</option>
+        <option value="de">German</option>
+        <option value="it">Italian</option>
+        <option value="ja">Japanese</option>
+        <option value="ko">Korean</option>
+        <option value="zh">Chinese</option>
+        <option value="ar">Arabic</option>
+        <option value="ru">Russian</option>
+      </select>
+    </div>
+
+    <div class="dropdown">
       <label>Voice</label>
       <select id="voiceSelect"></select>
     </div>
 
-    <div class="slider">
-      <label>Pitch</label>
-      <input id="pitch" type="range" min="0" max="3" step="0.1" value="1">
-      <span id="pitchVal">1.0</span>
-    </div>
-    <div class="slider">
-      <label>Rate</label>
-      <input id="rate" type="range" min="0.2" max="3" step="0.1" value="1">
-      <span id="rateVal">1.0</span>
-    </div>
-    <div class="slider">
-      <label>Volume</label>
-      <input id="volume" type="range" min="0" max="1" step="0.1" value="1">
-      <span id="volumeVal">1.0</span>
-    </div>
-
-    <div class="slider">
+    <div class="dropdown">
       <label>Tone Preset</label>
       <select id="presetSelect">
         <option value="normal">Normal</option>
@@ -126,26 +127,22 @@
   </div>
 
   <div>
-    <button onclick="speak()">Speak</button>
+    <button onclick="translateAndSpeak()">Translate & Speak</button>
     <button onclick="stopSpeaking()">Stop</button>
   </div>
 
+  <div class="output" id="translatedOutput"></div>
+
   <script>
-    const pitchSlider = document.getElementById('pitch');
-    const rateSlider = document.getElementById('rate');
-    const volumeSlider = document.getElementById('volume');
+    const langSelect = document.getElementById('langSelect');
     const voiceSelect = document.getElementById('voiceSelect');
     const presetSelect = document.getElementById('presetSelect');
+    const output = document.getElementById('translatedOutput');
 
-    document.querySelectorAll('input[type=range]').forEach(slider => {
-      slider.addEventListener('input', () => {
-        document.getElementById(slider.id + 'Val').textContent = slider.value;
-      });
-    });
+    let voices = [];
 
-    // Load available voices
     function loadVoices() {
-      const voices = speechSynthesis.getVoices();
+      voices = speechSynthesis.getVoices();
       voiceSelect.innerHTML = '';
       voices.forEach(voice => {
         const option = document.createElement('option');
@@ -157,147 +154,61 @@
 
     speechSynthesis.onvoiceschanged = loadVoices;
 
-    presetSelect.addEventListener('change', () => {
-      const p = presetSelect.value;
-      if (p === "chipmunk") { pitchSlider.value = 2; rateSlider.value = 1.8; volumeSlider.value = 1; }
-      if (p === "robot") { pitchSlider.value = 0.7; rateSlider.value = 1; volumeSlider.value = 1; }
-      if (p === "darth") { pitchSlider.value = 0.4; rateSlider.value = 0.8; volumeSlider.value = 1; }
-      if (p === "narrator") { pitchSlider.value = 1; rateSlider.value = 0.9; volumeSlider.value = 1; }
-      if (p === "whisper") { pitchSlider.value = 1.5; rateSlider.value = 0.8; volumeSlider.value = 0.3; }
-      if (p === "normal") { pitchSlider.value = 1; rateSlider.value = 1; volumeSlider.value = 1; }
-      document.getElementById('pitchVal').textContent = pitchSlider.value;
-      document.getElementById('rateVal').textContent = rateSlider.value;
-      document.getElementById('volumeVal').textContent = volumeSlider.value;
-    });
-
     function stopSpeaking() {
       speechSynthesis.cancel();
     }
 
-    function chunkTextByWords(text, maxWords = 25) {
-      const words = text.split(/\s+/);
-      const chunks = [];
-      for (let i = 0; i < words.length; i += maxWords) {
-        chunks.push(words.slice(i, i + maxWords).join(" "));
+    function applyPreset(preset, utter) {
+      switch (preset) {
+        case "chipmunk": utter.pitch = 2; utter.rate = 1.8; break;
+        case "robot": utter.pitch = 0.7; utter.rate = 1; break;
+        case "darth": utter.pitch = 0.4; utter.rate = 0.8; break;
+        case "narrator": utter.pitch = 1; utter.rate = 0.9; break;
+        case "whisper": utter.pitch = 1.5; utter.rate = 0.8; utter.volume = 0.4; break;
+        default: utter.pitch = 1; utter.rate = 1; utter.volume = 1;
       }
-      return chunks;
     }
 
-    function speak() {
+    async function translateAndSpeak() {
       const text = document.getElementById('textInput').value.trim();
       if (!text) {
         alert("Type something first!");
         return;
       }
 
-      const pitch = parseFloat(pitchSlider.value);
-      const rate = parseFloat(rateSlider.value);
-      const volume = parseFloat(volumeSlider.value);
+      const targetLang = langSelect.value;
       const voiceName = voiceSelect.value;
+      const preset = presetSelect.value;
 
-      speechSynthesis.cancel();
-      const chunks = chunkTextByWords(text);
-      const voices = speechSynthesis.getVoices();
-      const selectedVoice = voices.find(v => v.name === voiceName);
+      stopSpeaking();
+      output.textContent = "Translating...";
 
-      chunks.forEach((chunk, i) => {
-        const utter = new SpeechSynthesisUtterance(chunk);
-        utter.pitch = pitch;
-        utter.rate = rate;
-        utter.volume = volume;
-        if (selectedVoice) utter.voice = selectedVoice;
-        speechSynthesis.speak(utter);
-      });
-    }
-  </script>
-</body>
-</html>      justify-content: space-between;
-    }
-
-    label {
-      font-weight: bold;
-    }
-
-    input[type=range] {
-      flex: 1;
-      margin: 0 10px;
-    }
-  </style>
-</head>
-<body>
-  <h1>🗣️ Speak It! v2</h1>
-  <textarea id="textInput" placeholder="Type something for me to say..."></textarea>
-  <div class="controls">
-    <div class="slider">
-      <label>Pitch</label>
-      <input id="pitch" type="range" min="0" max="2" step="0.1" value="1">
-      <span id="pitchVal">1.0</span>
-    </div>
-    <div class="slider">
-      <label>Rate</label>
-      <input id="rate" type="range" min="0.5" max="2" step="0.1" value="1">
-      <span id="rateVal">1.0</span>
-    </div>
-    <div class="slider">
-      <label>Volume</label>
-      <input id="volume" type="range" min="0" max="1" step="0.1" value="1">
-      <span id="volumeVal">1.0</span>
-    </div>
-  </div>
-  <button onclick="speak()">Speak</button>
-
-  <script>
-    // Keep displayed values updated
-    document.querySelectorAll('input[type=range]').forEach(slider => {
-      slider.addEventListener('input', () => {
-        document.getElementById(slider.id + 'Val').textContent = slider.value;
-      });
-    });
-
-    function chunkText(text, chunkSize = 180) {
-      const chunks = [];
-      for (let i = 0; i < text.length; i += chunkSize) {
-        chunks.push(text.slice(i, i + chunkSize));
-      }
-      return chunks;
-    }
-
-    function speak() {
-      const text = document.getElementById('textInput').value.trim();
-      if (!text) {
-        alert("Type something first!");
-        return;
-      }
-
-      const pitch = parseFloat(document.getElementById('pitch').value);
-      const rate = parseFloat(document.getElementById('rate').value);
-      const volume = parseFloat(document.getElementById('volume').value);
-
-      // Stop any ongoing speech
-      speechSynthesis.cancel();
-
-      const chunks = chunkText(text);
-      chunks.forEach((chunk, i) => {
-        const utter = new SpeechSynthesisUtterance(chunk);
-        utter.pitch = pitch;
-        utter.rate = rate;
-        utter.volume = volume;
-        // Small delay between chunks to avoid cutoff
-        utter.addEventListener('end', () => {
-          if (i < chunks.length - 1 && !speechSynthesis.speaking) {
-            speechSynthesis.speak(new SpeechSynthesisUtterance(chunks[i + 1]));
-          }
+      try {
+        const res = await fetch("https://libretranslate.de/translate", {
+          method: "POST",
+          body: JSON.stringify({
+            q: text,
+            source: "auto",
+            target: targetLang,
+            format: "text"
+          }),
+          headers: { "Content-Type": "application/json" }
         });
-        if (i === 0) speechSynthesis.speak(utter);
-      });
-    }
-  </script>
-</body>
-</html>      }
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1; // speaking speed
-      utterance.pitch = 1; // voice pitch
-      speechSynthesis.speak(utterance);
+
+        const data = await res.json();
+        const translated = data.translatedText;
+        output.textContent = `🗣️ ${translated}`;
+
+        const utter = new SpeechSynthesisUtterance(translated);
+        const selectedVoice = voices.find(v => v.name === voiceName);
+        if (selectedVoice) utter.voice = selectedVoice;
+        applyPreset(preset, utter);
+        speechSynthesis.speak(utter);
+
+      } catch (err) {
+        console.error(err);
+        output.textContent = "Translation failed. Check your connection.";
+      }
     }
   </script>
 </body>
