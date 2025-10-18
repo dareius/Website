@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Speak It! v2</title>
+  <title>Speak It! Ultra Edition</title>
   <style>
     body {
       font-family: system-ui, sans-serif;
-      background: radial-gradient(circle at center, #ff8a00, #e52e71);
+      background: linear-gradient(135deg, #7f00ff, #e100ff);
       color: white;
       display: flex;
       flex-direction: column;
@@ -14,18 +14,19 @@
       justify-content: center;
       height: 100vh;
       margin: 0;
+      text-align: center;
     }
 
     h1 {
-      font-size: 2em;
-      margin-bottom: 20px;
-      text-shadow: 0 0 8px rgba(0,0,0,0.3);
+      font-size: 2.2em;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px rgba(0,0,0,0.4);
     }
 
     textarea {
       width: 80%;
-      max-width: 500px;
-      height: 100px;
+      max-width: 600px;
+      height: 120px;
       padding: 10px;
       border: none;
       border-radius: 10px;
@@ -35,10 +36,10 @@
     }
 
     button {
-      margin-top: 15px;
+      margin-top: 10px;
       padding: 10px 20px;
       background: white;
-      color: #e52e71;
+      color: #7f00ff;
       border: none;
       border-radius: 8px;
       font-weight: bold;
@@ -47,7 +48,7 @@
     }
 
     button:hover {
-      background: #ffccf2;
+      background: #e0b3ff;
     }
 
     .controls {
@@ -56,13 +57,161 @@
       flex-direction: column;
       gap: 10px;
       width: 80%;
-      max-width: 500px;
+      max-width: 600px;
     }
 
     .slider {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input[type=range] {
+      flex: 1;
+      margin: 0 10px;
+    }
+
+    select {
+      width: 100%;
+      padding: 8px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1em;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧠 Speak It! Ultra Edition</h1>
+  <textarea id="textInput" placeholder="Type something for me to say..."></textarea>
+
+  <div class="controls">
+    <div class="slider">
+      <label>Voice</label>
+      <select id="voiceSelect"></select>
+    </div>
+
+    <div class="slider">
+      <label>Pitch</label>
+      <input id="pitch" type="range" min="0" max="3" step="0.1" value="1">
+      <span id="pitchVal">1.0</span>
+    </div>
+    <div class="slider">
+      <label>Rate</label>
+      <input id="rate" type="range" min="0.2" max="3" step="0.1" value="1">
+      <span id="rateVal">1.0</span>
+    </div>
+    <div class="slider">
+      <label>Volume</label>
+      <input id="volume" type="range" min="0" max="1" step="0.1" value="1">
+      <span id="volumeVal">1.0</span>
+    </div>
+
+    <div class="slider">
+      <label>Tone Preset</label>
+      <select id="presetSelect">
+        <option value="normal">Normal</option>
+        <option value="chipmunk">Chipmunk</option>
+        <option value="robot">Robot</option>
+        <option value="darth">Darth Vader</option>
+        <option value="narrator">Narrator</option>
+        <option value="whisper">Whisper</option>
+      </select>
+    </div>
+  </div>
+
+  <div>
+    <button onclick="speak()">Speak</button>
+    <button onclick="stopSpeaking()">Stop</button>
+  </div>
+
+  <script>
+    const pitchSlider = document.getElementById('pitch');
+    const rateSlider = document.getElementById('rate');
+    const volumeSlider = document.getElementById('volume');
+    const voiceSelect = document.getElementById('voiceSelect');
+    const presetSelect = document.getElementById('presetSelect');
+
+    document.querySelectorAll('input[type=range]').forEach(slider => {
+      slider.addEventListener('input', () => {
+        document.getElementById(slider.id + 'Val').textContent = slider.value;
+      });
+    });
+
+    // Load available voices
+    function loadVoices() {
+      const voices = speechSynthesis.getVoices();
+      voiceSelect.innerHTML = '';
+      voices.forEach(voice => {
+        const option = document.createElement('option');
+        option.value = voice.name;
+        option.textContent = `${voice.name} (${voice.lang})${voice.default ? ' 🟢' : ''}`;
+        voiceSelect.appendChild(option);
+      });
+    }
+
+    speechSynthesis.onvoiceschanged = loadVoices;
+
+    presetSelect.addEventListener('change', () => {
+      const p = presetSelect.value;
+      if (p === "chipmunk") { pitchSlider.value = 2; rateSlider.value = 1.8; volumeSlider.value = 1; }
+      if (p === "robot") { pitchSlider.value = 0.7; rateSlider.value = 1; volumeSlider.value = 1; }
+      if (p === "darth") { pitchSlider.value = 0.4; rateSlider.value = 0.8; volumeSlider.value = 1; }
+      if (p === "narrator") { pitchSlider.value = 1; rateSlider.value = 0.9; volumeSlider.value = 1; }
+      if (p === "whisper") { pitchSlider.value = 1.5; rateSlider.value = 0.8; volumeSlider.value = 0.3; }
+      if (p === "normal") { pitchSlider.value = 1; rateSlider.value = 1; volumeSlider.value = 1; }
+      document.getElementById('pitchVal').textContent = pitchSlider.value;
+      document.getElementById('rateVal').textContent = rateSlider.value;
+      document.getElementById('volumeVal').textContent = volumeSlider.value;
+    });
+
+    function stopSpeaking() {
+      speechSynthesis.cancel();
+    }
+
+    function chunkTextByWords(text, maxWords = 25) {
+      const words = text.split(/\s+/);
+      const chunks = [];
+      for (let i = 0; i < words.length; i += maxWords) {
+        chunks.push(words.slice(i, i + maxWords).join(" "));
+      }
+      return chunks;
+    }
+
+    function speak() {
+      const text = document.getElementById('textInput').value.trim();
+      if (!text) {
+        alert("Type something first!");
+        return;
+      }
+
+      const pitch = parseFloat(pitchSlider.value);
+      const rate = parseFloat(rateSlider.value);
+      const volume = parseFloat(volumeSlider.value);
+      const voiceName = voiceSelect.value;
+
+      speechSynthesis.cancel();
+      const chunks = chunkTextByWords(text);
+      const voices = speechSynthesis.getVoices();
+      const selectedVoice = voices.find(v => v.name === voiceName);
+
+      chunks.forEach((chunk, i) => {
+        const utter = new SpeechSynthesisUtterance(chunk);
+        utter.pitch = pitch;
+        utter.rate = rate;
+        utter.volume = volume;
+        if (selectedVoice) utter.voice = selectedVoice;
+        speechSynthesis.speak(utter);
+      });
+    }
+  </script>
+</body>
+</html>      justify-content: space-between;
     }
 
     label {
