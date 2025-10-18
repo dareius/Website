@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Speak It!</title>
+  <title>Speak It! v2</title>
   <style>
     body {
       font-family: system-ui, sans-serif;
-      background: linear-gradient(135deg, #ff8a00, #e52e71);
+      background: radial-gradient(circle at center, #ff8a00, #e52e71);
       color: white;
       display: flex;
       flex-direction: column;
@@ -49,20 +49,102 @@
     button:hover {
       background: #ffccf2;
     }
+
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 80%;
+      max-width: 500px;
+    }
+
+    .slider {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input[type=range] {
+      flex: 1;
+      margin: 0 10px;
+    }
   </style>
 </head>
 <body>
-  <h1>🗣️ Speak It!</h1>
+  <h1>🗣️ Speak It! v2</h1>
   <textarea id="textInput" placeholder="Type something for me to say..."></textarea>
+  <div class="controls">
+    <div class="slider">
+      <label>Pitch</label>
+      <input id="pitch" type="range" min="0" max="2" step="0.1" value="1">
+      <span id="pitchVal">1.0</span>
+    </div>
+    <div class="slider">
+      <label>Rate</label>
+      <input id="rate" type="range" min="0.5" max="2" step="0.1" value="1">
+      <span id="rateVal">1.0</span>
+    </div>
+    <div class="slider">
+      <label>Volume</label>
+      <input id="volume" type="range" min="0" max="1" step="0.1" value="1">
+      <span id="volumeVal">1.0</span>
+    </div>
+  </div>
   <button onclick="speak()">Speak</button>
 
   <script>
+    // Keep displayed values updated
+    document.querySelectorAll('input[type=range]').forEach(slider => {
+      slider.addEventListener('input', () => {
+        document.getElementById(slider.id + 'Val').textContent = slider.value;
+      });
+    });
+
+    function chunkText(text, chunkSize = 180) {
+      const chunks = [];
+      for (let i = 0; i < text.length; i += chunkSize) {
+        chunks.push(text.slice(i, i + chunkSize));
+      }
+      return chunks;
+    }
+
     function speak() {
       const text = document.getElementById('textInput').value.trim();
       if (!text) {
         alert("Type something first!");
         return;
       }
+
+      const pitch = parseFloat(document.getElementById('pitch').value);
+      const rate = parseFloat(document.getElementById('rate').value);
+      const volume = parseFloat(document.getElementById('volume').value);
+
+      // Stop any ongoing speech
+      speechSynthesis.cancel();
+
+      const chunks = chunkText(text);
+      chunks.forEach((chunk, i) => {
+        const utter = new SpeechSynthesisUtterance(chunk);
+        utter.pitch = pitch;
+        utter.rate = rate;
+        utter.volume = volume;
+        // Small delay between chunks to avoid cutoff
+        utter.addEventListener('end', () => {
+          if (i < chunks.length - 1 && !speechSynthesis.speaking) {
+            speechSynthesis.speak(new SpeechSynthesisUtterance(chunks[i + 1]));
+          }
+        });
+        if (i === 0) speechSynthesis.speak(utter);
+      });
+    }
+  </script>
+</body>
+</html>      }
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 1; // speaking speed
       utterance.pitch = 1; // voice pitch
