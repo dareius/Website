@@ -1,183 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Speak It! Offline Multilingual</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      background: linear-gradient(135deg, #ff512f, #dd2476);
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 2em;
-      margin-bottom: 10px;
-      text-shadow: 0 0 10px rgba(0,0,0,0.3);
-    }
-
-    textarea {
-      width: 80%;
-      max-width: 600px;
-      height: 120px;
-      padding: 10px;
-      border: none;
-      border-radius: 10px;
-      font-size: 1.1em;
-      resize: none;
-      outline: none;
-    }
-
-    button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      background: white;
-      color: #dd2476;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    button:hover {
-      background: #ffcce0;
-    }
-
-    .controls {
-      margin-top: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      width: 80%;
-      max-width: 600px;
-    }
-
-    select {
-      width: 100%;
-      padding: 8px;
-      border-radius: 8px;
-      border: none;
-      font-size: 1em;
-      outline: none;
-    }
-
-    .output {
-      margin-top: 15px;
-      font-size: 1.1em;
-      color: #ffeef7;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Unicode Letter Transformer</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; }
+  input, select, output { font-size: 1.2em; margin: 5px 0; padding: 5px; }
+  output { border: 1px solid #ccc; display: block; width: 100%; min-height: 30px; background: #f9f9f9; }
+</style>
 </head>
 <body>
-  <h1>🌐 Speak It! Offline Multilingual</h1>
-  <textarea id="textInput" placeholder="Type something..."></textarea>
 
-  <div class="controls">
-    <label>Language</label>
-    <select id="langSelect">
-      <option value="en-US">English</option>
-      <option value="es-ES">Spanish</option>
-      <option value="fr-FR">French</option>
-      <option value="de-DE">German</option>
-      <option value="it-IT">Italian</option>
-      <option value="ja-JP">Japanese</option>
-    </select>
+<h2>Unicode Letter Transformer</h2>
 
-    <label>Tone Preset</label>
-    <select id="presetSelect">
-      <option value="normal">Normal</option>
-      <option value="chipmunk">Chipmunk</option>
-      <option value="robot">Robot</option>
-      <option value="darth">Darth Vader</option>
-      <option value="narrator">Narrator</option>
-      <option value="whisper">Whisper</option>
-    </select>
-  </div>
+<label for="styleSelect">Choose a style:</label>
+<select id="styleSelect">
+  <option value="bold">𝐀𝐁𝐂… (bold)</option>
+  <option value="italic">𝐴𝐵𝐶… (italic)</option>
+  <option value="fraktur">𝔄𝔅𝔆… (fraktur)</option>
+  <option value="double">𝔸𝔹ℂ… (double-struck)</option>
+</select>
 
-  <div>
-    <button onclick="translateAndSpeak()">Speak / Pseudo-Translate</button>
-    <button onclick="stopSpeaking()">Stop</button>
-  </div>
+<br>
 
-  <div class="output" id="translatedOutput"></div>
+<label for="inputText">Type letters here:</label>
+<input type="text" id="inputText" placeholder="Only letters will transform">
 
-  <script>
-    const voices = [];
-    const output = document.getElementById("translatedOutput");
+<br>
 
-    // Load available voices
-    function loadVoices() {
-      voices.length = 0;
-      speechSynthesis.getVoices().forEach(v => voices.push(v));
-    }
-    speechSynthesis.onvoiceschanged = loadVoices;
+<label>Transformed Output:</label>
+<output id="outputText" readonly></output>
 
-    // Minimal offline "fake translation" dictionary
-    const dictionary = {
-      "hello": { "es": "hola", "fr": "bonjour", "de": "hallo", "it": "ciao", "ja": "こんにちは" },
-      "goodbye": { "es": "adiós", "fr": "au revoir", "de": "tschüss", "it": "addio", "ja": "さようなら" },
-      "how are you": { "es": "¿cómo estás?", "fr": "comment ça va?", "de": "wie geht's?", "it": "come stai?", "ja": "お元気ですか？" },
-      "i love you": { "es": "te amo", "fr": "je t’aime", "de": "ich liebe dich", "it": "ti amo", "ja": "愛してる" }
-    };
+<script>
+const styles = {
+  bold:    {start: 0x1D400, lowerStart: 0x1D41A},
+  italic:  {start: 0x1D434, lowerStart: 0x1D44E},
+  fraktur: {start: 0x1D504, lowerStart: 0x1D51E},
+  double:  {start: 0x1D538, lowerStart: 0x1D552},
+};
 
-    function pseudoTranslate(text, targetLang) {
-      let lower = text.toLowerCase();
-      for (let key in dictionary) {
-        if (lower.includes(key)) {
-          const translated = dictionary[key][targetLang.slice(0,2)];
-          if (translated) {
-            lower = lower.replace(key, translated);
-          }
-        }
-      }
-      return lower;
-    }
+const input = document.getElementById('inputText');
+const output = document.getElementById('outputText');
+const select = document.getElementById('styleSelect');
 
-    function applyPreset(preset, utter) {
-      switch (preset) {
-        case "chipmunk": utter.pitch = 2; utter.rate = 1.8; break;
-        case "robot": utter.pitch = 0.7; utter.rate = 1; break;
-        case "darth": utter.pitch = 0.4; utter.rate = 0.8; break;
-        case "narrator": utter.pitch = 1; utter.rate = 0.9; break;
-        case "whisper": utter.pitch = 1.5; utter.rate = 0.8; utter.volume = 0.4; break;
-        default: utter.pitch = 1; utter.rate = 1; utter.volume = 1;
-      }
-    }
+function transformLetter(char, style) {
+  if(/[A-Z]/.test(char)) {
+    return String.fromCodePoint(styles[style].start + (char.charCodeAt(0) - 65));
+  } else if(/[a-z]/.test(char)) {
+    return String.fromCodePoint(styles[style].lowerStart + (char.charCodeAt(0) - 97));
+  } else {
+    return char; // keep other characters untouched
+  }
+}
 
-    function stopSpeaking() {
-      speechSynthesis.cancel();
-    }
+function transformText() {
+  const style = select.value;
+  const text = input.value;
+  let result = '';
+  for(let c of text) {
+    result += transformLetter(c, style);
+  }
+  output.value = result;
+}
 
-    function translateAndSpeak() {
-      const text = document.getElementById("textInput").value.trim();
-      if (!text) {
-        alert("Type something first!");
-        return;
-      }
+input.addEventListener('input', transformText);
+select.addEventListener('change', transformText);
+</script>
 
-      const lang = document.getElementById("langSelect").value;
-      const preset = document.getElementById("presetSelect").value;
-
-      const translated = pseudoTranslate(text, lang);
-      output.textContent = "🗣️ " + translated;
-
-      const utter = new SpeechSynthesisUtterance(translated);
-      utter.lang = lang;
-      const voice = voices.find(v => v.lang === lang);
-      if (voice) utter.voice = voice;
-      applyPreset(preset, utter);
-
-      speechSynthesis.cancel();
-      speechSynthesis.speak(utter);
-    }
-  </script>
 </body>
 </html>
