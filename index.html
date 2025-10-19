@@ -3,58 +3,120 @@
 <head>
 <meta charset="UTF-8">
 <title>Unicode Letter Transformer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  body { font-family: Arial, sans-serif; padding: 20px; }
-  input, select, output, button { font-size: 1.2em; margin: 5px 0; padding: 5px; }
-  output { border: 1px solid #ccc; display: block; width: 100%; min-height: 30px; background: #f9f9f9; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg,#f0f4ff,#d9e8ff);
+    color: #1a202c;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .container {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+  }
+  h1 {
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #2b6cb0;
+  }
+  select, input, button, output {
+    width: 100%;
+    font-size: 1.2em;
+    padding: 10px 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid #cbd5e0;
+  }
+  output {
+    background: #f7fafc;
+    min-height: 40px;
+    cursor: default;
+  }
+  button {
+    background: #2b6cb0;
+    color: white;
+    border: none;
+    font-weight: 600;
+    transition: 0.3s;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #2c5282;
+  }
+  .footer {
+    margin-top: 15px;
+    font-size: 0.9em;
+    color: #718096;
+  }
 </style>
 </head>
 <body>
+<div class="container">
+  <h1>Unicode Letter Transformer</h1>
 
-<h2>Unicode Letter Transformer</h2>
+  <select id="styleSelect">
+    <option value="fullwidth">ＡＢＣＤＥ… (Fullwidth)</option>
+    <option value="cyrillic">АВСЕН… (Cyrillic lookalikes)</option>
+    <option value="greek">ΑΒΓΔΕ… (Greek lookalikes)</option>
+    <option value="parenthesized">ⒶⒷⒸ… (Parenthesized)</option>
+    <option value="circled">ⓐⓑⓒ… (Circled)</option>
+    <option value="smallcaps">ᴀʙᴄ… (Small Caps)</option>
+    <option value="superscript">ᴬᴮᶜ… (Superscript)</option>
+    <option value="subscript">ₐᵦ𝒸… (Subscript)</option>
+  </select>
 
-<label for="styleSelect">Choose a style:</label>
-<select id="styleSelect">
-  <option value="bold">𝐀𝐁𝐂… (bold)</option>
-  <option value="italic">𝐴𝐵𝐶… (italic)</option>
-  <option value="fraktur">𝔄𝔅𝔆… (fraktur)</option>
-  <option value="double">𝔸𝔹ℂ… (double-struck)</option>
-  <option value="script">𝒜ℬ𝒞… (script)</option>
-  <option value="monospace">𝙰𝙱𝙲… (monospace)</option>
-  <option value="fullwidth">ＡＢＣ… (fullwidth)</option>
-  <option value="cyrillic">АВС… (Cyrillic lookalikes)</option>
-  <option value="greek">ΑΒΓ… (Greek lookalikes)</option>
-</select>
-
-<br>
-
-<label for="inputText">Type letters here:</label>
-<input type="text" id="inputText" placeholder="Only letters will transform">
-
-<br>
-
-<label>Transformed Output:</label>
-<output id="outputText" readonly></output>
-
-<button id="copyButton">Copy Output</button>
+  <input type="text" id="inputText" placeholder="Type letters here… Only letters transform">
+  <output id="outputText" readonly></output>
+  <button id="copyButton">Copy Output</button>
+  <div class="footer">All letters look real but are secret Unicode variants!</div>
+</div>
 
 <script>
 const styles = {
-  bold:        {upper: 0x1D400, lower: 0x1D41A},
-  italic:      {upper: 0x1D434, lower: 0x1D44E},
-  fraktur:     {upper: 0x1D504, lower: 0x1D51E},
-  double:      {upper: 0x1D538, lower: 0x1D552},
-  script:      {upper: 0x1D49C, lower: 0x1D4B6},
-  monospace:   {upper: 0x1D670, lower: 0x1D68A},
-  fullwidth:   {upper: 0xFF21, lower: 0xFF41},
-  cyrillic:    {map: {
-                  'A':'А','B':'В','C':'С','E':'Е','H':'Н','K':'К','M':'М','O':'О','P':'Р','T':'Т','X':'Х','a':'а','c':'с','e':'е','o':'о','p':'р','x':'х'
-                }},
-  greek:       {map: {
-                  'A':'Α','B':'Β','C':'Ϲ','E':'Ε','H':'Η','I':'Ι','K':'Κ','M':'Μ','N':'Ν','O':'Ο','P':'Ρ','T':'Τ','X':'Χ','Y':'Υ','Z':'Ζ',
-                  'a':'α','b':'β','c':'ϲ','e':'ε','h':'η','i':'ι','k':'κ','m':'μ','n':'ν','o':'ο','p':'ρ','t':'τ','x':'χ','y':'υ','z':'ζ'
-                }}
+  fullwidth: {
+    map: {}
+  },
+  cyrillic: {
+    map: {'A':'А','B':'В','C':'С','E':'Е','H':'Н','K':'К','M':'М','O':'О','P':'Р','T':'Т','X':'Х',
+          'a':'а','b':'ь','c':'с','e':'е','h':'н','k':'к','m':'м','o':'о','p':'р','t':'т','x':'х'}
+  },
+  greek: {
+    map: {'A':'Α','B':'Β','C':'Ϲ','D':'Δ','E':'Ε','H':'Η','I':'Ι','K':'Κ','M':'Μ','N':'Ν','O':'Ο','P':'Ρ','T':'Τ','X':'Χ','Y':'Υ','Z':'Ζ',
+          'a':'α','b':'β','c':'ϲ','d':'δ','e':'ε','h':'η','i':'ι','k':'κ','m':'μ','n':'ν','o':'ο','p':'ρ','t':'τ','x':'χ','y':'υ','z':'ζ'}
+  },
+  parenthesized: {
+    map: {'A':'Ⓐ','B':'Ⓑ','C':'Ⓒ','D':'Ⓓ','E':'Ⓔ','F':'Ⓕ','G':'Ⓖ','H':'Ⓗ','I':'Ⓘ','J':'Ⓙ','K':'Ⓚ','L':'Ⓛ','M':'Ⓜ','N':'Ⓝ','O':'Ⓞ','P':'Ⓟ','Q':'Ⓠ','R':'Ⓡ','S':'Ⓢ','T':'Ⓣ','U':'Ⓤ','V':'Ⓥ','W':'Ⓦ','X':'Ⓧ','Y':'Ⓨ','Z':'Ⓩ',
+          'a':'ⓐ','b':'ⓑ','c':'ⓒ','d':'ⓓ','e':'ⓔ','f':'ⓕ','g':'ⓖ','h':'ⓗ','i':'ⓘ','j':'ⓙ','k':'ⓚ','l':'ⓛ','m':'ⓜ','n':'ⓝ','o':'ⓞ','p':'ⓟ','q':'ⓠ','r':'ⓡ','s':'ⓢ','t':'ⓣ','u':'ⓤ','v':'ⓥ','w':'ⓦ','x':'ⓧ','y':'ⓨ','z':'ⓩ'}
+  },
+  circled: {
+    map: {'a':'ⓐ','b':'ⓑ','c':'ⓒ','d':'ⓓ','e':'ⓔ','f':'ⓕ','g':'ⓖ','h':'ⓗ','i':'ⓘ','j':'ⓙ','k':'ⓚ','l':'ⓛ','m':'ⓜ','n':'ⓝ','o':'ⓞ','p':'ⓟ','q':'ⓠ','r':'ⓡ','s':'ⓢ','t':'ⓣ','u':'ⓤ','v':'ⓥ','w':'ⓦ','x':'ⓧ','y':'ⓨ','z':'ⓩ'}
+  },
+  smallcaps: {
+    map: {'a':'ᴀ','b':'ʙ','c':'ᴄ','d':'ᴅ','e':'ᴇ','f':'ꜰ','g':'ɢ','h':'ʜ','i':'ɪ','j':'ᴊ','k':'ᴋ','l':'ʟ','m':'ᴍ','n':'ɴ','o':'ᴏ','p':'ᴘ','q':'ǫ','r':'ʀ','s':'s','t':'ᴛ','u':'ᴜ','v':'ᴠ','w':'ᴡ','x':'x','y':'ʏ','z':'ᴢ'}
+  },
+  superscript: {
+    map: {'A':'ᴬ','B':'ᴮ','C':'ᶜ','D':'ᴰ','E':'ᴱ','F':'ᶠ','G':'ᴳ','H':'ᴴ','I':'ᴵ','J':'ᴶ','K':'ᴷ','L':'ᴸ','M':'ᴹ','N':'ᴺ','O':'ᴼ','P':'ᴾ','Q':'Q','R':'ᴿ','S':'S','T':'ᵀ','U':'ᵁ','V':'ⱽ','W':'W','X':'ˣ','Y':'Y','Z':'ᶻ',
+          'a':'ᵃ','b':'ᵇ','c':'ᶜ','d':'ᵈ','e':'ᵉ','f':'ᶠ','g':'ᵍ','h':'ʰ','i':'ⁱ','j':'ʲ','k':'ᵏ','l':'ˡ','m':'ᵐ','n':'ⁿ','o':'ᵒ','p':'ᵖ','q':'q','r':'ʳ','s':'ˢ','t':'ᵗ','u':'ᵘ','v':'ᵛ','w':'ʷ','x':'ˣ','y':'ʸ','z':'ᶻ'}
+  },
+  subscript: {
+    map: {'a':'ₐ','e':'ₑ','h':'ₕ','i':'ᵢ','j':'ⱼ','k':'ₖ','l':'ₗ','m':'ₘ','n':'ₙ','o':'ₒ','p':'ₚ','r':'ᵣ','s':'ₛ','t':'ₜ','u':'ᵤ','v':'ᵥ','x':'ₓ'}
+  }
 };
+
+// Fullwidth auto-map
+for(let i=65;i<=90;i++){ styles.fullwidth.map[String.fromCharCode(i)] = String.fromCharCode(0xFF21+(i-65)); }
+for(let i=97;i<=122;i++){ styles.fullwidth.map[String.fromCharCode(i)] = String.fromCharCode(0xFF41+(i-97)); }
 
 const input = document.getElementById('inputText');
 const output = document.getElementById('outputText');
@@ -62,7 +124,28 @@ const select = document.getElementById('styleSelect');
 const copyButton = document.getElementById('copyButton');
 
 function transformLetter(char, style) {
-  if(styles[style].map) {
+  return styles[style].map[char] || char;
+}
+
+function transformText() {
+  const style = select.value;
+  const text = input.value;
+  let result = '';
+  for(let c of text) result += transformLetter(c, style);
+  output.value = result;
+}
+
+input.addEventListener('input', transformText);
+select.addEventListener('change', transformText);
+
+copyButton.addEventListener('click', () => {
+  navigator.clipboard.writeText(output.value)
+    .then(()=> alert('Copied!'))
+    .catch(()=> alert('Failed to copy.'));
+});
+</script>
+</body>
+</html>  if(styles[style].map) {
     return styles[style].map[char] || char;
   } else if(/[A-Z]/.test(char)) {
     return String.fromCodePoint(styles[style].upper + (char.charCodeAt(0) - 65));
