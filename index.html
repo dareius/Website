@@ -3,131 +3,73 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Roblox Avatar Viewer</title>
+<title>Roblox Avatar Viewer (Official API)</title>
 <style>
-body {
-  margin:0;
-  padding:0;
-  font-family:Arial,sans-serif;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-  background: linear-gradient(135deg,#0f2027,#203a43,#1e3a59);
-  color:#fff;
-}
-main.container {
-  background: rgba(0,0,0,0.8);
-  padding:30px;
-  border-radius:20px;
-  text-align:center;
-  box-shadow:0 10px 30px rgba(0,0,0,0.5);
-}
-input, button, select {
-  padding:12px;
-  margin:8px;
-  font-size:16px;
-  border-radius:10px;
-  border:none;
-}
+body { margin:0; padding:0; font-family:Arial,sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; background: linear-gradient(135deg,#0f2027,#203a43,#1e3a59); color:#fff; }
+main.container { background: rgba(0,0,0,0.8); padding:30px; border-radius:20px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.5); }
+input, button { padding:12px; margin:8px; font-size:16px; border-radius:10px; border:none; }
 input { width:250px; }
 button { background:#ff4d6d; color:#fff; cursor:pointer; transition:0.3s; }
 button:hover { background:#ff1a3c; }
-img { margin-top:20px; border-radius:15px; box-shadow:0 6px 25px rgba(0,0,0,0.5);}
+img { margin-top:20px; border-radius:15px; box-shadow:0 6px 25px rgba(0,0,0,0.5); }
 h1 { color:#fff; }
-label { display:block; margin-top:10px; }
 </style>
 </head>
 <body>
 <main class="container">
-<h1>Roblox Avatar Viewer</h1>
-
-<label for="methodSelect">Fetch Method:</label>
-<select id="methodSelect">
-  <option value="username">Username</option>
-  <option value="id">User ID</option>
-</select>
-
-<label for="displaySelect">Display Style:</label>
-<select id="displaySelect">
-  <option value="bust">Bust (3D Upper Body)</option>
-  <option value="headshot">Headshot</option>
-  <option value="fullbody">Full Body</option>
-</select>
-
+<h1>Roblox Avatar Viewer (Official API)</h1>
 <label for="usernameOrId" style="position:absolute; left:-9999px;">Enter Roblox username or ID</label>
 <input type="text" id="usernameOrId" placeholder="Enter Roblox username or ID">
 <button id="viewBtn">View Avatar</button>
-
 <div>
-  <img id="avatar" width="420" height="420" style="display:none" alt="Roblox 3D avatar">
+<img id="avatar" width="420" height="420" style="display:none" alt="Roblox avatar">
 </div>
+<div id="log" style="margin-top:10px; color:#aaa; text-align:left; font-size:14px;"></div>
 </main>
 
 <script>
-// Display options based on method
-const displayOptions = {
-  username: ['headshot', 'bust'],
-  id: ['headshot','bust','fullbody']
-};
+const logEl = document.getElementById('log');
+function log(msg) { logEl.textContent += msg + '\n'; }
 
-const displayNames = {
-  headshot: 'Headshot',
-  bust: 'Bust (3D Upper Body)',
-  fullbody: 'Full Body'
-};
-
-const methodSelect = document.getElementById('methodSelect');
-const displaySelect = document.getElementById('displaySelect');
-
-methodSelect.addEventListener('change', () => {
-  const method = methodSelect.value;
-  const options = displayOptions[method];
-  displaySelect.innerHTML = '';
-  options.forEach(opt => {
-    const el = document.createElement('option');
-    el.value = opt;
-    el.textContent = displayNames[opt];
-    displaySelect.appendChild(el);
-  });
-});
-
-// Fetch user ID
-async function getUserId(input, method) {
-  if(method === 'id' || !isNaN(input)) return input;
+async function getUserId(usernameOrId) {
+  if(!isNaN(usernameOrId)) return usernameOrId;
+  log('Looking up username: '+usernameOrId);
   const res = await fetch('https://users.roblox.com/v1/usernames/users', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ usernames: [input], excludeBannedUsers: false })
+    body: JSON.stringify({ usernames: [usernameOrId], excludeBannedUsers:false })
   });
   const data = await res.json();
-  if(!data.data || data.data.length === 0) throw new Error('User not found');
+  if(!data.data || data.data.length===0) throw new Error('User not found');
   return data.data[0].id;
 }
 
-// Display avatar based on method and style
 async function showAvatar() {
+  logEl.textContent = '';
   try {
-    const method = methodSelect.value;
-    const style = displaySelect.value;
     const input = document.getElementById('usernameOrId').value.trim();
     if(!input) return;
-    const userId = await getUserId(input, method);
+    const userId = await getUserId(input);
+    log('Using userId: '+userId);
 
-    let url;
-    if(style === 'headshot') {
-      url = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=420&height=420&format=Png`;
-    } else if(style === 'bust') {
-      url = `https://www.roblox.com/bust-thumbnail/image?userId=${userId}&width=420&height=420&format=Png`;
-    } else if(style === 'fullbody') {
-      url = `https://www.roblox.com/thumbnail/avatar?userId=${userId}&width=420&height=420&format=Png`; 
-    }
+    const apiUrl = `https://thumbnails.roblox.com/v1/users/avatar?userIds=${userId}&size=420x420&format=Png&isCircular=false`;
+    log('Fetching API: '+apiUrl);
+
+    const res = await fetch(apiUrl);
+    if(!res.ok) throw new Error('Failed to fetch thumbnail');
+    const data = await res.json();
+    log('API response: '+JSON.stringify(data));
+
+    if(!data.data || data.data.length===0) throw new Error('No data returned');
+    const imageUrl = data.data[0].imageUrl;
+    log('Image URL: '+imageUrl);
 
     const imgEl = document.getElementById('avatar');
-    imgEl.src = url;
+    imgEl.src = imageUrl;
     imgEl.style.display='block';
   } catch(err) {
     alert(err.message);
+    log('ERROR: '+err.message);
   }
 }
 
