@@ -101,38 +101,4 @@
     document.getElementById('viewBtn').addEventListener('click', showAvatar);
   </script>
 </body>
-</html></head>
-<body>
-  <div class="container">
-    <h1>Roblox 3D Avatar Viewer</h1>
-    <input type="text" id="usernameOrId" placeholder="Enter Roblox username or ID">
-    <button onclick="showAvatar()">View Avatar</button>
-    <div>
-      <img id="avatar" src="" alt="" width="420" height="420">
-    </div>
-  </div>
-
-  <script>
-    async function showAvatar() {
-      const input = document.getElementById('usernameOrId').value.trim();
-      if (!input) return;
-
-      let userId = input;
-
-      if (isNaN(input)) {
-        const res = await fetch(`https://api.roblox.com/users/get-by-username?username=${encodeURIComponent(input)}`);
-        const data = await res.json();
-        if (data && data.Id) {
-          userId = data.Id;
-        } else {
-          alert('User not found!');
-          return;
-        }
-      }
-
-      const avatarUrl = `https://thumbnails.roblox.com/v1/users/avatar?userIds=${userId}&size=420x420&format=Png&isCircular=false`;
-      document.getElementById('avatar').src = avatarUrl;
-    }
-  </script>
-</body>
 </html>
