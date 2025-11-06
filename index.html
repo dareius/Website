@@ -2,146 +2,54 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Unicode Letter Transformer</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roblox Avatar Viewer</title>
 <style>
-  * { box-sizing: border-box; }
   body {
-    font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg,#f0f4ff,#d9e8ff);
-    color: #1a202c;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    min-height: 100vh;
-    padding: 20px;
+    justify-content: center;
+    font-family: Arial, sans-serif;
+    margin-top: 50px;
   }
-  .container {
-    background: white;
-    padding: 30px;
-    border-radius: 16px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-    width: 100%;
-    max-width: 600px;
-    text-align: center;
+  input, button {
+    padding: 10px;
+    font-size: 16px;
+    margin: 5px;
   }
-  h1 {
-    font-weight: 600;
-    margin-bottom: 20px;
-    color: #2b6cb0;
-  }
-  select, input, button, output {
-    width: 100%;
-    font-size: 1.2em;
-    padding: 10px 12px;
-    margin: 10px 0;
-    border-radius: 8px;
-    border: 1px solid #cbd5e0;
-  }
-  output {
-    background: #f7fafc;
-    min-height: 40px;
-    cursor: default;
-  }
-  button {
-    background: #2b6cb0;
-    color: white;
-    border: none;
-    font-weight: 600;
-    transition: 0.3s;
-    cursor: pointer;
-  }
-  button:hover {
-    background: #2c5282;
-  }
-  .footer {
-    margin-top: 15px;
-    font-size: 0.9em;
-    color: #718096;
+  img {
+    margin-top: 20px;
+    border-radius: 10px;
   }
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>Unicode Letter Transformer</h1>
+  <input type="text" id="usernameOrId" placeholder="Enter Roblox username or ID">
+  <button onclick="showAvatar()">Show Avatar</button>
+  <img id="avatar" src="" alt="" width="420" height="420">
 
-  <select id="styleSelect">
-    <option value="fullwidth">ＡＢＣＤＥ… (Fullwidth)</option>
-    <option value="cyrillic">АВСЕН… (Cyrillic lookalikes)</option>
-    <option value="greek">ΑΒΓΔΕ… (Greek lookalikes)</option>
-    <option value="parenthesized">ⒶⒷⒸ… (Parenthesized)</option>
-    <option value="circled">ⓐⓑⓒ… (Circled)</option>
-    <option value="smallcaps">ᴀʙᴄ… (Small Caps)</option>
-    <option value="superscript">ᴬᴮᶜ… (Superscript)</option>
-    <option value="subscript">ₐᵦ𝒸… (Subscript)</option>
-    <option value="mathematical-bold">𝐀𝐁𝐂… (Math Bold)</option>
-    <option value="mathematical-italic">𝐴𝐵𝐶… (Math Italic)</option>
-    <option value="mathematical-script">𝒜ℬ𝒞… (Script)</option>
-    <option value="mathematical-monospace">𝙰𝙱𝙲… (Monospace)</option>
-  </select>
+  <script>
+    async function showAvatar() {
+      const input = document.getElementById('usernameOrId').value.trim();
+      if (!input) return;
 
-  <input type="text" id="inputText" placeholder="Type letters here… Only letters transform">
-  <output id="outputText" readonly></output>
-  <button id="copyButton">Copy Output</button>
-  <div class="footer">All letters look real but are secret Unicode variants!</div>
-</div>
+      let userId = input;
 
-<script>
-const styles = {
-  fullwidth: { map: {} },
-  cyrillic: { map: {'A':'А','B':'В','C':'С','E':'Е','H':'Н','K':'К','M':'М','O':'О','P':'Р','T':'Т','X':'Х','a':'а','b':'ь','c':'с','e':'е','h':'н','k':'к','m':'м','o':'о','p':'р','t':'т','x':'х'} },
-  greek: { map: {'A':'Α','B':'Β','C':'Ϲ','D':'Δ','E':'Ε','H':'Η','I':'Ι','K':'Κ','M':'Μ','N':'Ν','O':'Ο','P':'Ρ','T':'Τ','X':'Χ','Y':'Υ','Z':'Ζ',
-                 'a':'α','b':'β','c':'ϲ','d':'δ','e':'ε','h':'η','i':'ι','k':'κ','m':'μ','n':'ν','o':'ο','p':'ρ','t':'τ','x':'χ','y':'υ','z':'ζ'} },
-  parenthesized: { map: {'A':'Ⓐ','B':'Ⓑ','C':'Ⓒ','D':'Ⓓ','E':'Ⓔ','F':'Ⓕ','G':'Ⓖ','H':'Ⓗ','I':'Ⓘ','J':'Ⓙ','K':'Ⓚ','L':'Ⓛ','M':'Ⓜ','N':'Ⓝ','O':'Ⓞ','P':'Ⓟ','Q':'Ⓠ','R':'Ⓡ','S':'Ⓢ','T':'Ⓣ','U':'Ⓤ','V':'Ⓥ','W':'Ⓦ','X':'Ⓧ','Y':'Ⓨ','Z':'Ⓩ',
-                                     'a':'ⓐ','b':'ⓑ','c':'ⓒ','d':'ⓓ','e':'ⓔ','f':'ⓕ','g':'ⓖ','h':'ⓗ','i':'ⓘ','j':'ⓙ','k':'ⓚ','l':'ⓛ','m':'ⓜ','n':'ⓝ','o':'ⓞ','p':'ⓟ','q':'ⓠ','r':'ⓡ','s':'ⓢ','t':'ⓣ','u':'ⓤ','v':'ⓥ','w':'ⓦ','x':'ⓧ','y':'ⓨ','z':'ⓩ'} },
-  circled: { map: {'a':'ⓐ','b':'ⓑ','c':'ⓒ','d':'ⓓ','e':'ⓔ','f':'ⓕ','g':'ⓖ','h':'ⓗ','i':'ⓘ','j':'ⓙ','k':'ⓚ','l':'ⓛ','m':'ⓜ','n':'ⓝ','o':'ⓞ','p':'ⓟ','q':'ⓠ','r':'ⓡ','s':'ⓢ','t':'ⓣ','u':'ⓤ','v':'ⓥ','w':'ⓦ','x':'ⓧ','y':'ⓨ','z':'ⓩ'} },
-  smallcaps: { map: {'a':'ᴀ','b':'ʙ','c':'ᴄ','d':'ᴅ','e':'ᴇ','f':'ꜰ','g':'ɢ','h':'ʜ','i':'ɪ','j':'ᴊ','k':'ᴋ','l':'ʟ','m':'ᴍ','n':'ɴ','o':'ᴏ','p':'ᴘ','q':'ǫ','r':'ʀ','s':'s','t':'ᴛ','u':'ᴜ','v':'ᴠ','w':'ᴡ','x':'x','y':'ʏ','z':'ᴢ'} },
-  superscript: { map: {'A':'ᴬ','B':'ᴮ','C':'ᶜ','D':'ᴰ','E':'ᴱ','F':'ᶠ','G':'ᴳ','H':'ᴴ','I':'ᴵ','J':'ᴶ','K':'ᴷ','L':'ᴸ','M':'ᴹ','N':'ᴺ','O':'ᴼ','P':'ᴾ','Q':'Q','R':'ᴿ','S':'S','T':'ᵀ','U':'ᵁ','V':'ⱽ','W':'W','X':'ˣ','Y':'Y','Z':'ᶻ',
-                    'a':'ᵃ','b':'ᵇ','c':'ᶜ','d':'ᵈ','e':'ᵉ','f':'ᶠ','g':'ᵍ','h':'ʰ','i':'ⁱ','j':'ʲ','k':'ᵏ','l':'ˡ','m':'ᵐ','n':'ⁿ','o':'ᵒ','p':'ᵖ','q':'q','r':'ʳ','s':'ˢ','t':'ᵗ','u':'ᵘ','v':'ᵛ','w':'ʷ','x':'ˣ','y':'ʸ','z':'ᶻ'} },
-  subscript: { map: {'a':'ₐ','e':'ₑ','h':'ₕ','i':'ᵢ','j':'ⱼ','k':'ₖ','l':'ₗ','m':'ₘ','n':'ₙ','o':'ₒ','p':'ₚ','r':'ᵣ','s':'ₛ','t':'ₜ','u':'ᵤ','v':'ᵥ','x':'ₓ'} },
-  "mathematical-bold": { map: {} },
-  "mathematical-italic": { map: {} },
-  "mathematical-script": { map: {} },
-  "mathematical-monospace": { map: {} }
-};
+      if (isNaN(input)) {
+        const res = await fetch(`https://api.roblox.com/users/get-by-username?username=${encodeURIComponent(input)}`);
+        const data = await res.json();
+        if (data && data.Id) {
+          userId = data.Id;
+        } else {
+          alert('User not found!');
+          return;
+        }
+      }
 
-// Auto-generate uppercase/lowercase for fullwidth & math bold/italic/monospace
-for(let i=65;i<=90;i++){
-  styles.fullwidth.map[String.fromCharCode(i)] = String.fromCharCode(0xFF21+(i-65));
-  styles.fullwidth.map[String.fromCharCode(i+32)] = String.fromCharCode(0xFF41+(i-65));
-  styles["mathematical-bold"].map[String.fromCharCode(i)] = String.fromCodePoint(0x1D400+(i-65));
-  styles["mathematical-bold"].map[String.fromCharCode(i+32)] = String.fromCodePoint(0x1D41A+(i-65));
-  styles["mathematical-italic"].map[String.fromCharCode(i)] = String.fromCodePoint(0x1D434+(i-65));
-  styles["mathematical-italic"].map[String.fromCharCode(i+32)] = String.fromCodePoint(0x1D44E+(i-65));
-  styles["mathematical-script"].map[String.fromCharCode(i)] = String.fromCodePoint(0x1D49C+(i-65));
-  styles["mathematical-script"].map[String.fromCharCode(i+32)] = String.fromCodePoint(0x1D4B6+(i-65));
-  styles["mathematical-monospace"].map[String.fromCharCode(i)] = String.fromCodePoint(0x1D670+(i-65));
-  styles["mathematical-monospace"].map[String.fromCharCode(i+32)] = String.fromCodePoint(0x1D68A+(i-65));
-}
-
-const input = document.getElementById('inputText');
-const output = document.getElementById('outputText');
-const select = document.getElementById('styleSelect');
-const copyButton = document.getElementById('copyButton');
-
-function transformLetter(char, style) {
-  return styles[style].map[char] || char;
-}
-
-function transformText() {
-  const style = select.value;
-  const text = input.value;
-  output.value = [...text].map(c => transformLetter(c, style)).join('');
-}
-
-input.addEventListener('input', transformText);
-select.addEventListener('change', transformText);
-
-copyButton.addEventListener('click', () => {
-  navigator.clipboard.writeText(output.value)
-    .then(()=> alert('Copied!'))
-    .catch(()=> alert('Failed to copy.'));
-});
-</script>
+      const avatarUrl = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=420&height=420&format=png`;
+      document.getElementById('avatar').src = avatarUrl;
+    }
+  </script>
 </body>
 </html>
