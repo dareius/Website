@@ -1,68 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Roblox 3D Avatar Viewer</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #1c1c1c, #4b4b4b);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    flex-direction: column;
-    color: #fff;
-  }
-
-  h1 {
-    margin-bottom: 20px;
-  }
-
-  .container {
-    background: rgba(0,0,0,0.6);
-    padding: 30px;
-    border-radius: 20px;
-    text-align: center;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-  }
-
-  input, button {
-    padding: 12px 20px;
-    font-size: 16px;
-    margin: 10px 5px;
-    border-radius: 10px;
-    border: none;
-    outline: none;
-  }
-
-  input {
-    width: 250px;
-  }
-
-  button {
-    background: #ff4d6d;
-    color: #fff;
-    cursor: pointer;
-    transition: 0.3s;
-  }
-
-  button:hover {
-    background: #ff1a3c;
-  }
-
-  img {
-    margin-top: 20px;
-    border-radius: 20px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roblox 3D Avatar Viewer</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1c1c1c, #4b4b4b);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      color: #fff;
+    }
+    .container {
+      background: rgba(0,0,0,0.6);
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    input, button {
+      padding: 12px 20px;
+      font-size: 16px;
+      margin: 10px 5px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+    }
+    input {
+      width: 250px;
+    }
+    button {
+      background: #ff4d6d;
+      color: #fff;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #ff1a3c;
+    }
+    img {
+      margin-top: 20px;
+      border-radius: 20px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    }
+  </style>
 </head>
+<body>
+  <div class="container">
+    <h1>Roblox 3D Avatar Viewer</h1>
+    <input type="text" id="usernameOrId" placeholder="Enter Roblox username or ID">
+    <button id="viewBtn">View Avatar</button>
+    <div>
+      <img id="avatar" src="" alt="" width="420" height="420" style="display:none">
+    </div>
+  </div>
+
+  <script>
+    async function getUserId(input) {
+      if (!isNaN(input)) return input; 
+      const res = await fetch('https://users.roblox.com/v1/usernames/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usernames: [input], excludeBannedUsers: false })
+      });
+      if (!res.ok) throw new Error('Username lookup failed');
+      const data = await res.json();
+      if (!data.data || data.data.length === 0) throw new Error('User not found');
+      return data.data[0].id;
+    }
+
+    async function showAvatar() {
+      try {
+        const input = document.getElementById('usernameOrId').value.trim();
+        if (!input) return;
+        const userId = await getUserId(input);
+        const url = `https://thumbnails.roblox.com/v1/users/avatar?userIds=${userId}&size=420x420&format=Png&isCircular=false`;
+        const thumbRes = await fetch(url);
+        if (!thumbRes.ok) throw new Error('Thumbnail fetch failed');
+        const thumbData = await thumbRes.json();
+        if (!thumbData.data || thumbData.data.length === 0) throw new Error('No thumbnail found');
+        const imageUrl = thumbData.data[0].imageUrl;
+        const imgEl = document.getElementById('avatar');
+        imgEl.src = imageUrl;
+        imgEl.style.display = 'block';
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    document.getElementById('viewBtn').addEventListener('click', showAvatar);
+  </script>
+</body>
+</html></head>
 <body>
   <div class="container">
     <h1>Roblox 3D Avatar Viewer</h1>
