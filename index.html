@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Roblox 3D Avatar Viewer</title>
 <style>
+/* --- STYLES --- */
 body {
   margin: 0; padding: 0; font-family: Arial, sans-serif;
   display: flex; justify-content: center; align-items: center;
@@ -28,7 +29,11 @@ button:hover { background-color: #415a77; }
     display: none; /* Hide until a model is loaded */
 }
 h1 { color: #ffffff; }
-#log { margin-top: 10px; color: #cccccc; text-align: left; font-size: 14px; max-height: 100px; overflow: auto; width: 100%; max-width: 420px; }
+#log { 
+    margin-top: 10px; color: #cccccc; text-align: left; 
+    font-size: 14px; max-height: 100px; overflow: auto; 
+    width: 100%; max-width: 420px; 
+}
 </style>
 </head>
 <body>
@@ -46,27 +51,146 @@ h1 { color: #ffffff; }
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
 <script>
+// --- GLOBAL SETUP ---
 const logEl = document.getElementById('log');
 function log(msg) { logEl.textContent += msg + '\n'; }
 const canvas = document.getElementById('avatarCanvas');
-const container = document.querySelector('.container');
 let scene, camera, renderer, avatarGroup;
+// The CORS Proxy is added here to bypass browser security blocks on the model file.
+const CORS_PROXY = 'https://corsproxy.io/?'; 
 
-// --- INITIALIZE 3D SCENE ---
+// --- 3D SCENE INITIALIZATION ---
 function init3D() {
     log('Initializing 3D scene...');
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x333333); // Dark background for the scene
+    scene.background = new THREE.Color(0x333333); 
 
     camera = new THREE.PerspectiveCamera(75, 420 / 420, 0.1, 1000);
-    camera.position.set(0, 1.5, 3); // Position the camera in front of the avatar
+    camera.position.set(0, 1.5, 3);
 
     renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
     renderer.setSize(420, 420);
 
-    // Lighting (essential for seeing the model)
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Soft white light
+    // Lighting (Essential for visibility)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(1, 1, 1).normalize();
+    scene.add(directionalLight);
+
+    avatarGroup = new THREE.Group();
+    scene.add(avatarGroup);
+
+    animate();
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    // Simple rotation for visual effect
+    if (avatarGroup && avatarGroup.children.length > 0) {
+        avatarGroup.rotation.y += 0.005;
+    }
+    renderer.render(scene, camera);
+}
+
+// --- USER ID LOOKUP ---
+async function getUserId(input) {
+  if(!isNaN(input) && input.length < 15) return input;
+  log('Looking up username: ' + input);
+  const res = await fetch('https://users.roblox.com/v1/usernames/users', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ usernames:[input], excludeBannedUsers:false })
+  });
+  const data = await res.json();
+  if(!data.data || data.data.length===0) throw new Error('User not found. Check username/ID.');
+  return data.data[0].id;
+}
+
+// --- 3D MODEL LOADING FUNCTION (with CORS Fix) ---
+async function load3DModel(userId) {
+    // 1. Clear previous model
+    while (avatarGroup.children.length > 0) {
+        avatarGroup.remove(avatarGroup.children[0]);
+    }
+    canvas.style.display = 'none';
+
+    // 2. Get the GLB URL from the Roblox 3D API
+    const apiUrl = `https://thumbnails.roblox.com/v1/users/avatar-3d?userId=${userId}`;
+    log('Fetching 3D API: ' + apiUrl);
+    
+    const res = await fetch(apiUrl);
+    if(!res.ok) throw new Error('Failed to fetch 3D avatar JSON');
+    const data = await res.json();
+    
+    if(!data.data || data.data.length === 0 || !data.data[0].url) {
+        throw new Error('3D model data not available for this user.');
+    }
+    
+    const robloxModelUrl = data.data[0].url; 
+    
+    // *** The CORS Fix: Prepend the proxy to the model URL ***
+    const modelUrlWithProxy = CORS_PROXY + encodeURIComponent(robloxModelUrl); 
+    log('Loading GLB via Proxy...');
+
+    // 3. Load the model using Three.js GLTFLoader
+    const loader = new THREE.GLTFLoader();
+
+    return new Promise((resolve, reject) => {
+        loader.load(
+            modelUrlWithProxy, // Use the proxied URL
+            (gltf) => {
+                const model = gltf.scene;
+                
+                // Scale and position the model
+                const box = new THREE.Box3().setFromObject(model);
+                const size = new THREE.Vector3();
+                box.getSize(size);
+                const scale = 1.5 / size.y; 
+                model.scale.set(scale, scale, scale);
+                model.position.y = -box.min.y * scale; 
+                
+                avatarGroup.add(model);
+                canvas.style.display = 'block';
+                log('3D model loaded successfully!');
+                resolve();
+            },
+            (xhr) => {
+                log('Loading: ' + (xhr.loaded / xhr.total * 100).toFixed(0) + '%');
+            },
+            (error) => {
+                reject(new Error('GLTFLoader failed: The CORS proxy may be blocked or the model URL is invalid.'));
+            }
+        );
+    });
+}
+
+// --- MAIN EXECUTION ---
+async function showAvatar3D() {
+    logEl.textContent = '';
+    try {
+        const input = document.getElementById('usernameOrId').value.trim();
+        if(!input) {
+             log('Please enter a username or ID.');
+             return;
+        }
+        
+        const userId = await getUserId(input);
+        await load3DModel(userId);
+
+    } catch(err) {
+        alert(err.message);
+        log('FATAL ERROR: ' + err.message);
+        canvas.style.display = 'none';
+    }
+}
+
+// Initialize the 3D environment once the page loads
+init3D();
+document.getElementById('viewBtn').addEventListener('click', showAvatar3D);
+</script>
+</body>
+</html>
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
     directionalLight.position.set(1, 1, 1).normalize();
     scene.add(directionalLight);
