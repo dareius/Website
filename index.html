@@ -3,17 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Roblox Avatar Viewer (Official API)</title>
+<title>Roblox Avatar Viewer</title>
 <style>
-body { margin:0; padding:0; font-family:Arial,sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; background:linear-gradient(135deg,#0f2027,#203a43,#1e3a59); color:#fff; }
-main.container { background: rgba(0,0,0,0.8); padding:30px; border-radius:20px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.5); }
-input, button { padding:12px; margin:8px; font-size:16px; border-radius:10px; border:none; }
-input { width:250px; }
-button { background:#ff4d6d; color:#fff; cursor:pointer; transition:0.3s; }
-button:hover { background:#ff1a3c; }
-img { margin-top:20px; border-radius:15px; box-shadow:0 6px 25px rgba(0,0,0,0.5);}
-h1 { color:#fff; }
-#log { margin-top:10px; color:#aaa; text-align:left; font-size:14px; max-height:100px; overflow:auto; }
+body {
+  margin:0;
+  padding:0;
+  font-family:Arial,sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  background-color:#0d1b2a; /* solid dark for max contrast */
+  color:#ffffff; /* white text for WCAG 2 AA */
+}
+main.container {
+  background: rgba(0,0,0,0.9);
+  padding:30px;
+  border-radius:20px;
+  text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,0.5);
+}
+input, button {
+  padding:12px;
+  margin:8px;
+  font-size:16px;
+  border-radius:10px;
+  border:none;
+  color:#ffffff;
+  background-color:#1b263b; /* strong contrast button */
+}
+input::placeholder {
+  color:#cccccc; /* light gray placeholder, high enough contrast */
+}
+button:hover {
+  background-color:#415a77;
+}
+img {
+  margin-top:20px;
+  border-radius:15px;
+  box-shadow:0 6px 25px rgba(0,0,0,0.5);
+}
+h1 {
+  color:#ffffff;
+}
+#log { margin-top:10px; color:#cccccc; text-align:left; font-size:14px; max-height:100px; overflow:auto; }
 </style>
 </head>
 <body>
