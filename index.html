@@ -1,3 +1,4 @@
+6
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,26 +6,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Roblox 3D Avatar Viewer</title>
 <style>
-body {
-  margin:0; padding:0;
-  font-family: Arial, sans-serif;
-  display:flex; justify-content:center; align-items:center;
-  height:100vh;
-  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  color:#fff;
-}
-.container {
-  background: rgba(0,0,0,0.7);
-  padding: 30px; border-radius: 20px; text-align: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-input, button {
-  padding: 12px; margin: 8px; font-size:16px; border-radius:10px; border:none;
-}
-input { width:250px; }
-button { background:#ff4d6d; color:#fff; cursor:pointer; transition:0.3s; }
-button:hover { background:#ff1a3c; }
-img { margin-top:20px; border-radius:15px; box-shadow:0 6px 25px rgba(0,0,0,0.5); }
+body { margin:0;padding:0;font-family:Arial,sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);color:#fff;}
+.container {background: rgba(0,0,0,0.7);padding:30px;border-radius:20px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.5);}
+input, button {padding:12px;margin:8px;font-size:16px;border-radius:10px;border:none;}
+input {width:250px;}
+button {background:#ff4d6d;color:#fff;cursor:pointer;transition:0.3s;}
+button:hover {background:#ff1a3c;}
+img {margin-top:20px;border-radius:15px;box-shadow:0 6px 25px rgba(0,0,0,0.5);}
 </style>
 </head>
 <body>
@@ -33,7 +21,7 @@ img { margin-top:20px; border-radius:15px; box-shadow:0 6px 25px rgba(0,0,0,0.5)
   <input type="text" id="usernameOrId" placeholder="Enter Roblox username or ID">
   <button id="viewBtn">View Avatar</button>
   <div>
-    <img id="avatar" src="" width="420" height="420" style="display:none">
+    <img id="avatar" width="420" height="420" style="display:none">
   </div>
 </div>
 
@@ -55,12 +43,10 @@ async function showAvatar() {
     const input = document.getElementById('usernameOrId').value.trim();
     if(!input) return;
     const userId = await getUserId(input);
-
-    // 🚀 Alternative direct render method
-    const url = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=420&height=420&format=Png`;
+    const url = `https://www.roblox.com/bust-thumbnail/image?userId=${userId}&width=420&height=420&format=Png`;
     const imgEl = document.getElementById('avatar');
     imgEl.src = url;
-    imgEl.style.display = 'block';
+    imgEl.style.display='block';
   } catch(err) {
     alert(err.message);
   }
