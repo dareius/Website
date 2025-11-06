@@ -3,31 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Roblox Avatar Viewer</title>
+<title>Roblox 3D Avatar Viewer</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
   body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #1c1c1c, #4b4b4b);
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
-    font-family: Arial, sans-serif;
-    margin-top: 50px;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+    color: #fff;
   }
+
+  h1 {
+    margin-bottom: 20px;
+  }
+
+  .container {
+    background: rgba(0,0,0,0.6);
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  }
+
   input, button {
-    padding: 10px;
+    padding: 12px 20px;
     font-size: 16px;
-    margin: 5px;
+    margin: 10px 5px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
   }
+
+  input {
+    width: 250px;
+  }
+
+  button {
+    background: #ff4d6d;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  button:hover {
+    background: #ff1a3c;
+  }
+
   img {
     margin-top: 20px;
-    border-radius: 10px;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
   }
 </style>
 </head>
 <body>
-  <input type="text" id="usernameOrId" placeholder="Enter Roblox username or ID">
-  <button onclick="showAvatar()">Show Avatar</button>
-  <img id="avatar" src="" alt="" width="420" height="420">
+  <div class="container">
+    <h1>Roblox 3D Avatar Viewer</h1>
+    <input type="text" id="usernameOrId" placeholder="Enter Roblox username or ID">
+    <button onclick="showAvatar()">View Avatar</button>
+    <div>
+      <img id="avatar" src="" alt="" width="420" height="420">
+    </div>
+  </div>
 
   <script>
     async function showAvatar() {
@@ -47,7 +91,7 @@
         }
       }
 
-      const avatarUrl = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=420&height=420&format=png`;
+      const avatarUrl = `https://thumbnails.roblox.com/v1/users/avatar?userIds=${userId}&size=420x420&format=Png&isCircular=false`;
       document.getElementById('avatar').src = avatarUrl;
     }
   </script>
