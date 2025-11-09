@@ -3,191 +3,118 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Roblox 3D Avatar Viewer</title>
+<title>Roblox Player Game Checker</title>
 <style>
-/* --- STYLES --- */
-body {
-  margin: 0; padding: 0; font-family: Arial, sans-serif;
-  display: flex; justify-content: center; align-items: center;
-  height: 100vh; background-color: #0d1b2a; color: #ffffff;
-}
-main.container {
-  background: rgba(0,0,0,0.9); padding: 30px; border-radius: 20px;
-  text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  display: flex; flex-direction: column; align-items: center;
-}
-input, button {
-  padding: 12px; margin: 8px; font-size: 16px; border-radius: 10px;
-  border: none; color: #ffffff; background-color: #1b263b;
-}
-button:hover { background-color: #415a77; }
-/* Canvas will hold the 3D scene */
-#avatarCanvas {
-    margin-top: 20px;
-    border-radius: 15px;
-    box-shadow: 0 6px 25px rgba(0,0,0,0.5);
-    display: none; /* Hide until a model is loaded */
-}
-h1 { color: #ffffff; }
-#log { 
-    margin-top: 10px; color: #cccccc; text-align: left; 
-    font-size: 14px; max-height: 100px; overflow: auto; 
-    width: 100%; max-width: 420px; 
-}
+    body {font-family: Arial, sans-serif; background: #f2f2f2; display:flex; justify-content:center; align-items:flex-start; padding-top:50px;}
+    #checker {position: fixed; left: 20px; top: 80px; width: 320px; background: #fff; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); padding: 12px; user-select: none;}
+    #checker-header {cursor: move; font-weight: 700; margin-bottom: 8px; display:flex; justify-content:space-between; font-size: 14px;}
+    #checker input {flex:1; padding:8px; border-radius: 8px; border:1px solid #ccc; outline:none; font-size: 13px;}
+    #checker button {padding:8px 10px; border:none; border-radius:8px; background:#1376F2; color:#fff; font-weight:600; cursor:pointer;}
+    #result {margin-top:10px; padding:8px; border-radius:8px; background:#f9f9f9; min-height:34px; display:flex; align-items:center; font-size:13px;}
 </style>
 </head>
 <body>
-<main class="container">
-<h1>Roblox 3D Avatar Viewer</h1>
-<input type="text" id="usernameOrId" placeholder="Enter Roblox username or ID">
-<button id="viewBtn">View 3D Avatar</button>
-
-<canvas id="avatarCanvas" width="420" height="420"></canvas>
-
-<div id="log"></div>
-</main>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<div id="checker">
+    <div id="checker-header">
+        <div>Player Game Checker</div>
+        <div style="font-size:12px;color:#666;">v1</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+        <input id="usernameInput" placeholder="Username or ID">
+        <button id="checkBtn">Check</button>
+    </div>
+    <div id="result">Enter a username or ID and click Check</div>
+</div>
 
 <script>
-// --- GLOBAL SETUP ---
-const logEl = document.getElementById('log');
-function log(msg) { logEl.textContent += msg + '\n'; }
-const canvas = document.getElementById('avatarCanvas');
-let scene, camera, renderer, avatarGroup;
-// The CORS Proxy is added here to bypass browser security blocks on the model file.
-const CORS_PROXY = 'https://corsproxy.io/?'; 
+const proxy = {
+    users: 'https://users.roproxy.com/v1/usernames/users',
+    presence: 'https://presence.roproxy.com/v1/presence/users',
+    games: 'https://games.roproxy.com/v1/games/multiget-place-details'
+};
 
-// --- 3D SCENE INITIALIZATION ---
-function init3D() {
-    log('Initializing 3D scene...');
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x333333); 
+const checker = document.getElementById('checker');
+const header = document.getElementById('checker-header');
+const input = document.getElementById('usernameInput');
+const button = document.getElementById('checkBtn');
+const result = document.getElementById('result');
 
-    camera = new THREE.PerspectiveCamera(75, 420 / 420, 0.1, 1000);
-    camera.position.set(0, 1.5, 3);
+let dragging = false;
+let offset = {x:0, y:0};
 
-    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
-    renderer.setSize(420, 420);
+header.addEventListener('mousedown', e => {
+    dragging = true;
+    const rect = checker.getBoundingClientRect();
+    offset.x = e.clientX - rect.left;
+    offset.y = e.clientY - rect.top;
+});
 
-    // Lighting (Essential for visibility)
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    scene.add(ambientLight);
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(1, 1, 1).normalize();
-    scene.add(directionalLight);
+window.addEventListener('mousemove', e => {
+    if(!dragging) return;
+    checker.style.left = (e.clientX - offset.x) + 'px';
+    checker.style.top = (e.clientY - offset.y) + 'px';
+});
 
-    avatarGroup = new THREE.Group();
-    scene.add(avatarGroup);
+window.addEventListener('mouseup', () => dragging = false);
 
-    animate();
+function isNumeric(str){ return /^\d+$/.test(str.trim()); }
+
+async function fetchJson(url, opts = {}) {
+    const res = await fetch(url, opts);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
 }
 
-function animate() {
-    requestAnimationFrame(animate);
-    // Simple rotation for visual effect
-    if (avatarGroup && avatarGroup.children.length > 0) {
-        avatarGroup.rotation.y += 0.005;
-    }
-    renderer.render(scene, camera);
+async function resolveUser(inputVal){
+    inputVal = inputVal.trim();
+    if(!inputVal) throw new Error('No input provided');
+    if(isNumeric(inputVal)) return Number(inputVal);
+    const payload = {usernames:[inputVal]};
+    const data = await fetchJson(proxy.users, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+    if(!data || !data.data || data.data.length === 0) throw new Error('Username not found');
+    return data.data[0].id;
 }
 
-// --- USER ID LOOKUP ---
-async function getUserId(input) {
-  if(!isNaN(input) && input.length < 15) return input;
-  log('Looking up username: ' + input);
-  const res = await fetch('https://users.roblox.com/v1/usernames/users', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ usernames:[input], excludeBannedUsers:false })
-  });
-  const data = await res.json();
-  if(!data.data || data.data.length===0) throw new Error('User not found. Check username/ID.');
-  return data.data[0].id;
+async function getPresence(userId){
+    const url = `${proxy.presence}?userIds=${encodeURIComponent(userId)}`;
+    const data = await fetchJson(url);
+    if(!data || !Array.isArray(data.userPresences)) throw new Error('No presence data');
+    return data.userPresences.find(p=>String(p.userId)===String(userId)) || null;
 }
 
-// --- 3D MODEL LOADING FUNCTION (with CORS Fix) ---
-async function load3DModel(userId) {
-    // 1. Clear previous model
-    while (avatarGroup.children.length > 0) {
-        avatarGroup.remove(avatarGroup.children[0]);
-    }
-    canvas.style.display = 'none';
-
-    // 2. Get the GLB URL from the Roblox 3D API
-    const apiUrl = `https://thumbnails.roblox.com/v1/users/avatar-3d?userId=${userId}`;
-    log('Fetching 3D API: ' + apiUrl);
-    
-    const res = await fetch(apiUrl);
-    if(!res.ok) throw new Error('Failed to fetch 3D avatar JSON');
-    const data = await res.json();
-    
-    if(!data.data || data.data.length === 0 || !data.data[0].url) {
-        throw new Error('3D model data not available for this user.');
-    }
-    
-    const robloxModelUrl = data.data[0].url; 
-    
-    // *** The CORS Fix: Prepend the proxy to the model URL ***
-    const modelUrlWithProxy = CORS_PROXY + encodeURIComponent(robloxModelUrl); 
-    log('Loading GLB via Proxy...');
-
-    // 3. Load the model using Three.js GLTFLoader
-    const loader = new THREE.GLTFLoader();
-
-    return new Promise((resolve, reject) => {
-        loader.load(
-            modelUrlWithProxy, // Use the proxied URL
-            (gltf) => {
-                const model = gltf.scene;
-                
-                // Scale and position the model
-                const box = new THREE.Box3().setFromObject(model);
-                const size = new THREE.Vector3();
-                box.getSize(size);
-                const scale = 1.5 / size.y; 
-                model.scale.set(scale, scale, scale);
-                model.position.y = -box.min.y * scale; 
-                
-                avatarGroup.add(model);
-                canvas.style.display = 'block';
-                log('3D model loaded successfully!');
-                resolve();
-            },
-            (xhr) => {
-                log('Loading: ' + (xhr.loaded / xhr.total * 100).toFixed(0) + '%');
-            },
-            (error) => {
-                reject(new Error('GLTFLoader failed: The CORS proxy may be blocked or the model URL is invalid.'));
-            }
-        );
-    });
+async function getPlaceName(placeId){
+    if(!placeId) return null;
+    const url = `${proxy.games}?placeIds=${encodeURIComponent(placeId)}`;
+    const data = await fetchJson(url);
+    if(!Array.isArray(data) || data.length === 0) return null;
+    return data[0]?.name || null;
 }
 
-// --- MAIN EXECUTION ---
-async function showAvatar3D() {
-    logEl.textContent = '';
-    try {
-        const input = document.getElementById('usernameOrId').value.trim();
-        if(!input) {
-             log('Please enter a username or ID.');
-             return;
-        }
-        
-        const userId = await getUserId(input);
-        await load3DModel(userId);
-
-    } catch(err) {
-        alert(err.message);
-        log('FATAL ERROR: ' + err.message);
-        canvas.style.display = 'none';
+async function checkPlayer(){
+    try{
+        button.disabled = true;
+        button.style.opacity = '0.6';
+        result.textContent = 'Resolving user...';
+        const raw = input.value;
+        const userId = await resolveUser(raw);
+        result.textContent = `Found user id ${userId}. Checking presence...`;
+        const pres = await getPresence(userId);
+        if(!pres) { result.textContent = 'No presence info'; return; }
+        const placeId = pres.placeId || pres.rootPlaceId || null;
+        if(!placeId) { result.textContent = 'User not in a public game'; return; }
+        result.textContent = 'Fetching game details...';
+        const name = await getPlaceName(placeId);
+        result.textContent = name ? `Player is in: ${name}` : `Player is in a game (placeId: ${placeId})`;
+    }catch(e){
+        result.textContent = 'Error: ' + e.message;
+    }finally{
+        button.disabled = false;
+        button.style.opacity = '1';
     }
 }
 
-// Initialize the 3D environment once the page loads
-init3D();
-document.getElementById('viewBtn').addEventListener('click', showAvatar3D);
+button.addEventListener('click', checkPlayer);
+input.addEventListener('keydown', e => { if(e.key === 'Enter') checkPlayer(); });
 </script>
 </body>
 </html>
