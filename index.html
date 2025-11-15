@@ -1,139 +1,43 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Vercel Thingy Status</title>
+<meta charset="utf-8">
+<title>Video Description Fetch</title>
 <style>
-  :root{--size:160px;--bg:#000}
-  html,body{height:100%;margin:0;background:var(--bg);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:#ddd}
-  .wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
-  .circle{width:var(--size);height:var(--size);border-radius:50%;background:#222;box-shadow:0 6px 30px rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;transition:background .35s,box-shadow .35s,transform .15s}
-  .circle.pulse{animation:pulse 1.6s infinite}
-  @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
-  .status-dot{width:70%;height:70%;border-radius:50%;background:#444;box-shadow:inset 0 -6px 24px rgba(0,0,0,.6);transition:background .35s,box-shadow .35s}
-  .up .status-dot{background:#2ecc71;box-shadow:0 8px 30px rgba(46,204,113,.18)}
-  .down .status-dot{background:#e74c3c;box-shadow:0 8px 30px rgba(231,76,60,.18)}
-  .checking .status-dot{background:linear-gradient(90deg,#666,#444);box-shadow:0 8px 30px rgba(255,255,255,.03) inset}
-  .controls{display:flex;gap:8px;align-items:center}
-  input[type="url"]{background:#111;border:1px solid #222;padding:10px 12px;color:#fff;border-radius:8px;width:360px;outline:none}
-  button{background:#0b0b0b;border:1px solid #333;color:#fff;padding:10px 12px;border-radius:8px;cursor:pointer}
-  .meta{font-size:13px;color:#aaa}
-  .result-text{margin-top:8px;font-weight:600}
-  .small{font-size:12px;color:#999}
-  a{color:#6cf}
-  @media (max-width:480px){input[type="url"]{width:220px}}
+  body{margin:0;background:#000;display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;font-family:Arial;color:#fff;gap:20px}
+  input{width:320px;padding:12px;border:none;border-radius:6px;font-size:16px;outline:none}
+  button{padding:12px 20px;border:none;border-radius:6px;font-size:16px;cursor:pointer}
+  #out{max-width:600px;white-space:pre-wrap;font-size:16px}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="circle checking" id="circle" title="status">
-      <div class="status-dot" id="dot"></div>
-    </div>
-    <div class="controls">
-      <input id="urlInput" type="url" placeholder="https://your-vercel-app.vercel.app" value="" />
-      <button id="checkBtn">Check</button>
-      <button id="autoBtn">Auto: Off</button>
-    </div>
-    <div class="meta">
-      <div class="result-text" id="statusText">Enter your Vercel URL and press Check</div>
-      <div class="small" id="details"></div>
-    </div>
-  </div>
+<input id="vid" placeholder="YouTube link…" />
+<button id="btn">Get Description</button>
+<div id="out"></div>
 
 <script>
-const circle = document.getElementById('circle')
-const dot = document.getElementById('dot')
-const statusText = document.getElementById('statusText')
-const details = document.getElementById('details')
-const urlInput = document.getElementById('urlInput')
-const checkBtn = document.getElementById('checkBtn')
-const autoBtn = document.getElementById('autoBtn')
-let autoInterval = null
-
-function normalizeUrl(raw){
-  if(!raw) return ''
-  raw = raw.trim()
-  if(!/^https?:\/\//i.test(raw)) raw = 'https://' + raw
+function extractId(url){
   try{
-    const u = new URL(raw)
-    return u.origin
+    const u=new URL(url)
+    if(u.searchParams.get("v")) return u.searchParams.get("v")
+    if(u.pathname.startsWith("/shorts/")) return u.pathname.split("/")[2]
+    return null
+  }catch(e){return null}
+}
+
+btn.onclick=async()=>{
+  const id=extractId(vid.value.trim())
+  if(!id){out.textContent="Invalid link";return}
+  out.textContent="Fetching…"
+  try{
+    const r=await fetch(`https://yt.lemnoslife.com/noKey/videos?part=snippet&id=${id}`)
+    const j=await r.json()
+    const d=j.items?.[0]?.snippet?.description||"No description"
+    out.textContent=d
   }catch(e){
-    return ''
+    out.textContent="Failed to fetch"
   }
 }
-
-function setState(state, info=''){
-  circle.classList.remove('up','down','checking','pulse')
-  circle.classList.add(state)
-  if(state==='up'){statusText.textContent='UP — your Vercel thingy is reachable'; details.textContent = info}
-  else if(state==='down'){statusText.textContent='DOWN — cannot reach your Vercel thingy'; details.textContent = info}
-  else if(state==='checking'){statusText.textContent='Checking…'; details.textContent = info}
-}
-
-async function checkUrl(rawUrl, timeoutMs = 5000){
-  const origin = normalizeUrl(rawUrl)
-  if(!origin){ setState('down','Invalid URL'); return false }
-  setState('checking','Trying fetch to ' + origin)
-  const controller = new AbortController()
-  const timer = setTimeout(()=>controller.abort(), timeoutMs)
-
-  try{
-    const res = await fetch(origin, {method:'GET', mode:'cors', cache:'no-store', signal: controller.signal})
-    clearTimeout(timer)
-    if(res && typeof res.ok === 'boolean'){
-      if(res.ok){ setState('up', `HTTP ${res.status} ${res.statusText}`); return true }
-      else{ setState('down', `HTTP ${res.status} ${res.statusText}`); return false }
-    }else{
-      setState('down','Unknown fetch response'); return false
-    }
-  }catch(fetchErr){
-    clearTimeout(timer)
-    setState('checking','Fetch failed or blocked by CORS — falling back to image test')
-    const ok = await imageFallback(origin)
-    return ok
-  }
-}
-
-function imageFallback(origin){
-  return new Promise(resolve=>{
-    const img = new Image()
-    const url = origin.replace(/\/+$/,'') + '/favicon.ico' + '?_=' + Date.now()
-    let settled = false
-    const t = setTimeout(()=>{ if(settled) return; settled=true; img.src=''; setState('down','Image fallback timed out'); resolve(false) }, 5000)
-    img.onload = ()=>{
-      if(settled) return; settled=true; clearTimeout(t); setState('up','favicon.ico loaded'); resolve(true)
-    }
-    img.onerror = ()=>{
-      if(settled) return; settled=true; clearTimeout(t); setState('down','Image fallback failed (no favicon or blocked)'); resolve(false)
-    }
-    img.src = url
-  })
-}
-
-checkBtn.addEventListener('click', ()=>checkUrl(urlInput.value))
-urlInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') checkUrl(urlInput.value) })
-
-autoBtn.addEventListener('click', ()=>{
-  if(autoInterval){
-    clearInterval(autoInterval); autoInterval = null; autoBtn.textContent = 'Auto: Off'
-  } else {
-    const u = urlInput.value.trim()
-    if(!u) { setState('down','Enter a URL first'); return }
-    autoBtn.textContent = 'Auto: On'
-    checkUrl(u)
-    autoInterval = setInterval(()=>checkUrl(u), 10000)
-  }
-})
-
-document.addEventListener('visibilitychange', ()=>{
-  if(document.hidden && autoInterval){ clearInterval(autoInterval); autoInterval = null; autoBtn.textContent='Auto: Off' }
-})
-
-(function niceInitial(){
-  urlInput.value = ''
-  setState('checking','Ready')
-})()
 </script>
 </body>
 </html>
