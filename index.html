@@ -19,8 +19,17 @@
 function extractId(url){
   try{
     const u=new URL(url)
+
     if(u.searchParams.get("v")) return u.searchParams.get("v")
-    if(u.pathname.startsWith("/shorts/")) return u.pathname.split("/")[2]
+
+    if(u.hostname==="youtu.be"){
+      return u.pathname.replace("/","").split("?")[0]
+    }
+
+    if(u.pathname.startsWith("/shorts/")){
+      return u.pathname.split("/")[2]
+    }
+
     return null
   }catch(e){return null}
 }
